@@ -1,0 +1,75 @@
+export function getSellCoreApiBase() {
+  const publicApiBase = import.meta.env?.VITE_SELLCORE_API_BASE?.trim();
+
+  if (publicApiBase) {
+    return publicApiBase.replace(/\/$/, "");
+  }
+
+  const host = window.location.hostname;
+
+  if (host === "localhost" || host === "127.0.0.1") {
+    return "http://localhost:4100";
+  }
+
+  return `http://${host}:4100`;
+}
+
+export async function checkSellCoreBackend() {
+  const apiBase = getSellCoreApiBase();
+
+  try {
+    const response = await fetch(`${apiBase}/api/health`);
+    const data = await response.json();
+
+    return {
+      connected: Boolean(data.ok),
+      apiBase,
+      data
+    };
+  } catch (error) {
+    return {
+      connected: false,
+      apiBase,
+      fallback: "localStorage",
+      error: error.message
+    };
+  }
+}
+
+export async function getSellCoreNetwork() {
+  const apiBase = getSellCoreApiBase();
+  const response = await fetch(`${apiBase}/api/network`);
+  return response.json();
+}
+
+export async function logSellCoreBackendEvent(type, payload = {}) {
+  const apiBase = getSellCoreApiBase();
+
+  const response = await fetch(`${apiBase}/api/event`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      type,
+      source: "sellcore-frontend",
+      payload
+    })
+  });
+
+  return response.json();
+}
+
+export async function mergeSellCoreBackendState(partialState) {
+  const apiBase = getSellCoreApiBase();
+
+  const response = await fetch(`${apiBase}/api/state/merge`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(partialState)
+  });
+
+  return response.json();
+}

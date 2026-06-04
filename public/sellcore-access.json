@@ -1,0 +1,34 @@
+{
+    "system":  "SellCore 3-Server Access Profile",
+    "updatedAt":  "2026-05-29T20:23:12",
+    "pcName":  "antimatter",
+    "stableHost":  "antimatter.local",
+    "frontend":  {
+                     "stableLocal":  "http://antimatter.local:5173/",
+                     "localhost":  "http://localhost:5173/"
+                 },
+    "backend":  {
+                    "stableLocalHealth":  "http://antimatter.local:4100/api/health",
+                    "localhostHealth":  "http://localhost:4100/api/health"
+                },
+    "vpnPrivateRoutes":  [
+
+                         ],
+    "localNetworkRoutes":  [
+                               {
+                                   "kind":  "local-network-route",
+                                   "interface":  "Wi-Fi",
+                                   "ip":  "192.168.12.128",
+                                   "frontendUrl":  "http://192.168.12.128:5173/",
+                                   "backendHealthUrl":  "http://192.168.12.128:4100/api/health"
+                               }
+                           ],
+    "allRoutes":  {
+                      "kind":  "local-network-route",
+                      "interface":  "Wi-Fi",
+                      "ip":  "192.168.12.128",
+                      "frontendUrl":  "http://192.168.12.128:5173/",
+                      "backendHealthUrl":  "http://192.168.12.128:4100/api/health"
+                  },
+    "law":  "Frontend 5173 + Backend 4100 + VPN/private route detection. IP route is fallback; stableHost/VPN route is preferred when available."
+}

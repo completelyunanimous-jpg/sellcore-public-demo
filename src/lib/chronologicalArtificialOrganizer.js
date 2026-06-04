@@ -50,7 +50,6 @@ function countArrayByName(entries, names) {
 
 export function readSellCoreQuantities() {
   const entries = getAllLocalStorage();
-
   const totalBytes = entries.reduce((sum, entry) => sum + entry.bytes, 0);
 
   const quantities = {
@@ -79,7 +78,7 @@ export function createOrganizerRecord(type = "system_scan", source = "chronologi
   const records = Array.isArray(current) ? current : [];
 
   const record = {
-    id: crypto.randomUUID ? crypto.randomUUID() : `cao-${Date.now()}-${Math.random()}`,
+    id: window.crypto && crypto.randomUUID ? crypto.randomUUID() : `cao-${Date.now()}-${Math.random()}`,
     timestamp: new Date().toISOString(),
     type,
     source,
@@ -98,6 +97,15 @@ export function createOrganizerRecord(type = "system_scan", source = "chronologi
 export function readOrganizerRecords() {
   const records = safeJson(localStorage.getItem(STORAGE_KEY), []);
   return Array.isArray(records) ? records : [];
+}
+
+function metric(label, value) {
+  return `
+    <div style="border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:9px;">
+      <div style="font-size:11px; opacity:0.62;">${label}</div>
+      <div style="font-size:18px; font-weight:900;">${value}</div>
+    </div>
+  `;
 }
 
 function buildPanel() {
@@ -131,7 +139,7 @@ function buildPanel() {
         <div style="font-size:12px; letter-spacing:0.14em; opacity:0.7;">BLOCK 013</div>
         <div style="font-size:17px; font-weight:800;">Chronological Organizer</div>
       </div>
-      <button id="sellcore-cao-close" style="border:0; border-radius:999px; padding:6px 10px; background:white; color:#06101f; font-weight:800;">×</button>
+      <button id="sellcore-cao-close" style="border:0; border-radius:999px; padding:6px 10px; background:white; color:#06101f; font-weight:800;">X</button>
     </div>
 
     <div style="margin-top:12px; font-size:13px; opacity:0.82; line-height:1.45;">
@@ -168,7 +176,7 @@ function buildPanel() {
         <div style="border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:8px;">
           <div style="font-size:11px; opacity:0.65;">${new Date(record.timestamp).toLocaleString()}</div>
           <div style="font-size:13px; font-weight:800;">${record.type}</div>
-          <div style="font-size:11px; opacity:0.7;">Keys: ${record.quantities?.localStorageKeys ?? 0} · Bytes: ${record.quantities?.totalLocalBytes ?? 0}</div>
+          <div style="font-size:11px; opacity:0.7;">Keys: ${record.quantities?.localStorageKeys ?? 0} | Bytes: ${record.quantities?.totalLocalBytes ?? 0}</div>
         </div>
       `).join("")}
     </div>
@@ -200,15 +208,6 @@ function buildPanel() {
 
     URL.revokeObjectURL(url);
   });
-}
-
-function metric(label, value) {
-  return `
-    <div style="border:1px solid rgba(255,255,255,0.12); border-radius:12px; padding:9px;">
-      <div style="font-size:11px; opacity:0.62;">${label}</div>
-      <div style="font-size:18px; font-weight:900;">${value}</div>
-    </div>
-  `;
 }
 
 function buildButton() {
@@ -255,7 +254,7 @@ function patchLocalStorageTracking() {
         valueBytes: new Blob([String(value)]).size
       });
     } catch {
-      // Silent by design. Organizer must never break SellCore.
+      // Organizer must never break SellCore.
     }
   };
 }

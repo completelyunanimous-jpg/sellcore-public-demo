@@ -1,3 +1,4 @@
+import { installSellCoreCoreFixBridge } from "./lib/sellCoreCoreFixBridge.js";
 import { installChronologicalArtificialOrganizer } from './lib/chronologicalArtificialOrganizer.js';
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -13,3 +14,5 @@ createRoot(document.getElementById("root")).render(
 
 setTimeout(() => installChronologicalArtificialOrganizer(), 600);
 
+
+installSellCoreCoreFixBridge();

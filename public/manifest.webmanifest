@@ -1,22 +1,25 @@
-{
-  "name": "SellCore",
+﻿{
+  "name": "SellCore Public Demo",
   "short_name": "SellCore",
-  "description": "Social Marketplace for Daily Goods",
-  "start_url": "/",
+  "description": "SellCore — Social Marketplace for Daily Goods",
+  "start_url": "/sellcore-public-demo/?source=pwa",
+  "scope": "/sellcore-public-demo/",
   "display": "standalone",
-  "background_color": "#081523",
-  "theme_color": "#081523",
+  "orientation": "portrait",
+  "background_color": "#050c1c",
+  "theme_color": "#050c1c",
   "icons": [
     {
-      "src": "/sellcore-core-logo.png",
-      "sizes": "1024x1024",
+      "src": "/sellcore-public-demo/sellcore-core-logo.png",
+      "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/apple-touch-icon.png",
-      "sizes": "1024x1024",
-      "type": "image/png"
+      "src": "/sellcore-public-demo/sellcore-core-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }

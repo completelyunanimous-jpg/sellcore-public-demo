@@ -1,5 +1,6 @@
 const COREFIX_ENTRIES_KEY = "sellcore:corefix:entries";
 const COREFIX_CARDS_KEY = "sellcore:corefix:cards";
+const LATEST_KEY = "sellcore:corefix:latest";
 
 function safeJsonParse(value, fallback) {
   try {
@@ -30,73 +31,79 @@ function classifyProblem(text, category) {
 
   if (category === "React" || lower.includes("jsx") || lower.includes("component") || lower.includes("usestate")) {
     return {
-      likelyCause: "React structure or JSX state flow issue.",
-      sampleFix: "Check component export, JSX closing tags, state names, and whether the component is imported correctly.",
-      nextStep: "Create a smaller reproduction component and verify it builds before merging into the main app."
+      likelyCause: "React component, JSX, state, import, or render-flow issue.",
+      sampleFix: "Check JSX closing tags, component exports, imports, state names, and whether the component is mounted correctly.",
+      nextStep: "Create a smaller test component and run npm run build before merging the fix into the full app."
     };
   }
 
-  if (category === "Vite" || lower.includes("vite") || lower.includes("build") || lower.includes("module")) {
+  if (category === "Vite" || lower.includes("vite") || lower.includes("build") || lower.includes("module") || lower.includes("utf-8")) {
     return {
-      likelyCause: "Vite build, path, import, or encoding issue.",
-      sampleFix: "Run npm run build, inspect the exact file path in the error, then check imports, UTF-8 encoding, and missing files.",
-      nextStep: "Fix the first error shown by Vite before chasing secondary errors."
+      likelyCause: "Vite build, import path, module, missing file, or encoding issue.",
+      sampleFix: "Run npm run build, read the first error, verify the exact file path, and rewrite suspicious files as UTF-8 without BOM.",
+      nextStep: "Fix the first Vite error before chasing secondary errors."
     };
   }
 
   if (category === "PowerShell" || lower.includes("powershell") || lower.includes("script") || lower.includes("not recognized")) {
     return {
-      likelyCause: "PowerShell path, syntax, quoting, or execution-context issue.",
-      sampleFix: "Confirm the current folder with pwd, verify the file exists with Test-Path, then run the command from the project root.",
-      nextStep: "Use one clean command block at a time and stop after the first red error."
+      likelyCause: "PowerShell path, quote, syntax, execution-location, or command-context issue.",
+      sampleFix: "Run pwd, confirm the target file exists with Test-Path, then execute one clean command block from the project root.",
+      nextStep: "Stop at the first red error and convert it into a CoreFix card."
     };
   }
 
   if (category === "GitHub" || lower.includes("git") || lower.includes("push") || lower.includes("workflow") || lower.includes("pages")) {
     return {
-      likelyCause: "Git status, branch, remote, or GitHub Actions deployment issue.",
-      sampleFix: "Run git status, git log --oneline -5, then gh run list --repo completelyunanimous-jpg/sellcore-public-demo --limit 5.",
-      nextStep: "Only push after local build passes and the working tree has the intended changes."
+      likelyCause: "Git status, branch, remote, workflow, or GitHub Pages deployment issue.",
+      sampleFix: "Run git status, git log --oneline -5, and gh run list --repo completelyunanimous-jpg/sellcore-public-demo --limit 5.",
+      nextStep: "Only push after local build passes and the intended files are staged."
     };
   }
 
   return {
-    likelyCause: "General app logic or workflow issue.",
-    sampleFix: "Reduce the problem to the smallest visible symptom, confirm what changed last, then test one fix at a time.",
-    nextStep: "Save a diagnostic card so the issue becomes reusable CoreFix product material."
+    likelyCause: "General app logic, workflow, data, or UI interaction issue.",
+    sampleFix: "Reduce the problem to the smallest visible symptom, identify the last changed block, and test one fix at a time.",
+    nextStep: "Save the diagnosis as a reusable CoreFix card."
   };
 }
 
 function createDiagnostic(problem, category) {
-  const diagnosis = classifyProblem(problem, category);
-
   return {
     id: `corefix-${Date.now()}-${Math.random().toString(16).slice(2)}`,
     createdAt: new Date().toISOString(),
     category,
     problem,
-    diagnosis,
+    diagnosis: classifyProblem(problem, category),
     status: "free_diagnostic_preview",
     productLane: "Free diagnosis → sample fix → paid full fix → card pack → custom work"
   };
 }
 
-function cardTemplate(entry) {
-  return `
+function escapeHtml(value) {
+  return String(value ?? "")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function renderRecent(entries) {
+  if (!entries.length) {
+    return `<div style="font-size:12px; opacity:0.62;">No diagnostics yet.</div>`;
+  }
+
+  return entries.slice(0, 5).map((entry) => `
     <div style="border:1px solid rgba(255,255,255,0.12); border-radius:14px; padding:10px; background:rgba(255,255,255,0.045);">
-      <div style="display:flex; justify-content:space-between; gap:8px; align-items:flex-start;">
-        <div>
-          <div style="font-size:11px; opacity:0.62;">${new Date(entry.createdAt).toLocaleString()}</div>
-          <div style="font-size:13px; font-weight:900;">${entry.category}</div>
-        </div>
-        <div style="font-size:10px; opacity:0.62;">${entry.status}</div>
-      </div>
-      <div style="margin-top:8px; font-size:12px; opacity:0.82; line-height:1.4;">${String(entry.problem || "").slice(0, 160)}</div>
+      <div style="font-size:11px; opacity:0.62;">${new Date(entry.createdAt).toLocaleString()}</div>
+      <div style="font-size:13px; font-weight:900;">${escapeHtml(entry.category)}</div>
+      <div style="margin-top:8px; font-size:12px; opacity:0.82; line-height:1.4;">${escapeHtml(entry.problem).slice(0, 160)}</div>
       <div style="margin-top:8px; font-size:12px; line-height:1.4;">
-        <strong>Likely cause:</strong> ${entry.diagnosis?.likelyCause || "Unknown"}
+        <strong>Likely cause:</strong> ${escapeHtml(entry.diagnosis?.likelyCause || "Unknown")}
       </div>
     </div>
-  `;
+  `).join("");
 }
 
 function buildCoreFixPanel() {
@@ -122,15 +129,16 @@ function buildCoreFixPanel() {
   panel.style.color = "white";
   panel.style.fontFamily = "Arial, sans-serif";
   panel.style.boxShadow = "0 20px 70px rgba(0,0,0,0.48)";
+  panel.style.pointerEvents = "auto";
 
   panel.innerHTML = `
     <div style="display:flex; justify-content:space-between; gap:10px; align-items:center;">
       <div>
-        <div style="font-size:12px; letter-spacing:0.14em; opacity:0.7;">BLOCK 016</div>
+        <div style="font-size:12px; letter-spacing:0.14em; opacity:0.7;">BLOCK 016A</div>
         <div style="font-size:18px; font-weight:900;">CoreFix Diagnostic Entry</div>
-        <div style="font-size:12px; opacity:0.62; margin-top:2px;">Free diagnosis → sample fix → paid product path</div>
+        <div style="font-size:12px; opacity:0.62; margin-top:2px;">Interaction repair active</div>
       </div>
-      <button id="sellcore-corefix-close" style="border:0; border-radius:999px; padding:7px 11px; background:white; color:#06101f; font-weight:900;">X</button>
+      <button type="button" id="sellcore-corefix-close" style="border:0; border-radius:999px; padding:7px 11px; background:white; color:#06101f; font-weight:900;">X</button>
     </div>
 
     <div style="margin-top:12px; font-size:13px; opacity:0.82; line-height:1.45;">
@@ -139,20 +147,20 @@ function buildCoreFixPanel() {
 
     <div style="margin-top:14px; display:grid; gap:8px;">
       <select id="sellcore-corefix-category" style="width:100%; border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:11px; background:#07111f; color:white; font-weight:800;">
-        <option>React</option>
-        <option>Vite</option>
-        <option>PowerShell</option>
-        <option>GitHub</option>
-        <option>General</option>
+        <option value="React">React</option>
+        <option value="Vite">Vite</option>
+        <option value="PowerShell">PowerShell</option>
+        <option value="GitHub">GitHub</option>
+        <option value="General">General</option>
       </select>
 
-      <textarea id="sellcore-corefix-problem" placeholder="Paste the problem, error, or app issue here..." style="width:100%; min-height:108px; resize:vertical; border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:11px; background:rgba(255,255,255,0.055); color:white; font-family:Arial, sans-serif; box-sizing:border-box;"></textarea>
+      <textarea id="sellcore-corefix-problem" placeholder="Paste the problem, error, or app issue here..." style="width:100%; min-height:112px; resize:vertical; border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:11px; background:rgba(255,255,255,0.055); color:white; font-family:Arial, sans-serif; box-sizing:border-box;"></textarea>
 
-      <button id="sellcore-corefix-diagnose" style="width:100%; border:0; border-radius:14px; padding:12px; background:#f3c75f; color:#07101d; font-weight:950;">
+      <button type="button" id="sellcore-corefix-diagnose" style="width:100%; border:0; border-radius:14px; padding:12px; background:#f3c75f; color:#07101d; font-weight:950;">
         Generate Free Diagnostic Preview
       </button>
 
-      <button id="sellcore-corefix-save-card" style="width:100%; border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:12px; background:transparent; color:white; font-weight:900;">
+      <button type="button" id="sellcore-corefix-save-card" style="width:100%; border:1px solid rgba(255,255,255,0.2); border-radius:14px; padding:12px; background:transparent; color:white; font-weight:900;">
         Save Latest Diagnostic as CoreFix Card
       </button>
     </div>
@@ -173,23 +181,31 @@ function buildCoreFixPanel() {
     <div style="margin-top:16px;">
       <div style="font-size:12px; letter-spacing:0.14em; opacity:0.7; margin-bottom:8px;">RECENT COREFIX DIAGNOSTICS</div>
       <div style="display:flex; flex-direction:column; gap:8px;">
-        ${entries.slice(0, 5).map(cardTemplate).join("") || `<div style="font-size:12px; opacity:0.62;">No diagnostics yet.</div>`}
+        ${renderRecent(entries)}
       </div>
     </div>
   `;
 
   document.body.appendChild(panel);
 
-  let latestDiagnostic = null;
+  const closeBtn = document.getElementById("sellcore-corefix-close");
+  const diagnoseBtn = document.getElementById("sellcore-corefix-diagnose");
+  const saveBtn = document.getElementById("sellcore-corefix-save-card");
+  const output = document.getElementById("sellcore-corefix-output");
 
-  document.getElementById("sellcore-corefix-close")?.addEventListener("click", () => panel.remove());
+  closeBtn.onclick = () => {
+    panel.remove();
+  };
 
-  document.getElementById("sellcore-corefix-diagnose")?.addEventListener("click", () => {
-    const problem = document.getElementById("sellcore-corefix-problem")?.value || "";
-    const category = document.getElementById("sellcore-corefix-category")?.value || "General";
+  diagnoseBtn.onclick = () => {
+    const problemEl = document.getElementById("sellcore-corefix-problem");
+    const categoryEl = document.getElementById("sellcore-corefix-category");
+
+    const problem = problemEl?.value || "";
+    const category = categoryEl?.value || "General";
 
     if (!problem.trim()) {
-      document.getElementById("sellcore-corefix-output").innerHTML = `
+      output.innerHTML = `
         <div style="border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:10px; background:rgba(255,255,255,0.045); font-size:13px;">
           Add a problem first. CoreFix needs an error, symptom, or app issue to diagnose.
         </div>
@@ -197,35 +213,28 @@ function buildCoreFixPanel() {
       return;
     }
 
-    latestDiagnostic = createDiagnostic(problem, category);
-    const entries = readEntries();
-    writeEntries([latestDiagnostic, ...entries]);
+    const diagnostic = createDiagnostic(problem, category);
+    localStorage.setItem(LATEST_KEY, JSON.stringify(diagnostic));
 
-    document.getElementById("sellcore-corefix-output").innerHTML = `
+    const entries = readEntries();
+    writeEntries([diagnostic, ...entries]);
+
+    output.innerHTML = `
       <div style="border:1px solid rgba(243,199,95,0.35); border-radius:16px; padding:12px; background:rgba(243,199,95,0.08);">
         <div style="font-size:12px; opacity:0.72;">FREE DIAGNOSTIC PREVIEW</div>
-        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Likely Cause:</strong> ${latestDiagnostic.diagnosis.likelyCause}</div>
-        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Sample Fix:</strong> ${latestDiagnostic.diagnosis.sampleFix}</div>
-        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Next Step:</strong> ${latestDiagnostic.diagnosis.nextStep}</div>
-        <div style="margin-top:10px; font-size:11px; opacity:0.62;">Product lane: ${latestDiagnostic.productLane}</div>
+        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Likely Cause:</strong> ${escapeHtml(diagnostic.diagnosis.likelyCause)}</div>
+        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Sample Fix:</strong> ${escapeHtml(diagnostic.diagnosis.sampleFix)}</div>
+        <div style="margin-top:8px; font-size:13px; line-height:1.5;"><strong>Next Step:</strong> ${escapeHtml(diagnostic.diagnosis.nextStep)}</div>
+        <div style="margin-top:10px; font-size:11px; opacity:0.62;">Product lane: ${escapeHtml(diagnostic.productLane)}</div>
       </div>
     `;
+  };
 
-    try {
-      window.dispatchEvent(new CustomEvent("sellcore:corefix:diagnostic-created", { detail: latestDiagnostic }));
-    } catch {
-      // Event bridge must never break CoreFix.
-    }
-  });
+  saveBtn.onclick = () => {
+    const latest = safeJsonParse(localStorage.getItem(LATEST_KEY), null);
 
-  document.getElementById("sellcore-corefix-save-card")?.addEventListener("click", () => {
-    if (!latestDiagnostic) {
-      const entries = readEntries();
-      latestDiagnostic = entries[0] || null;
-    }
-
-    if (!latestDiagnostic) {
-      document.getElementById("sellcore-corefix-output").innerHTML = `
+    if (!latest) {
+      output.innerHTML = `
         <div style="border:1px solid rgba(255,255,255,0.16); border-radius:14px; padding:10px; background:rgba(255,255,255,0.045); font-size:13px;">
           Generate a diagnostic first, then save it as a CoreFix card.
         </div>
@@ -235,7 +244,7 @@ function buildCoreFixPanel() {
 
     const cards = readCards();
     const card = {
-      ...latestDiagnostic,
+      ...latest,
       cardId: `corefix-card-${Date.now()}`,
       status: "saved_corefix_card",
       savedAt: new Date().toISOString()
@@ -243,20 +252,12 @@ function buildCoreFixPanel() {
 
     writeCards([card, ...cards]);
 
-    document.getElementById("sellcore-corefix-output").innerHTML = `
+    output.innerHTML = `
       <div style="border:1px solid rgba(95,243,176,0.35); border-radius:16px; padding:12px; background:rgba(95,243,176,0.08); font-size:13px; line-height:1.5;">
         CoreFix card saved. This can become a reusable fix pack item, paid single fix, or client diagnostic.
       </div>
     `;
-
-    try {
-      window.dispatchEvent(new CustomEvent("sellcore:corefix:card-saved", { detail: card }));
-    } catch {
-      // Event bridge must never break CoreFix.
-    }
-
-    setTimeout(buildCoreFixPanel, 450);
-  });
+  };
 }
 
 function buildCoreFixButton() {
@@ -264,11 +265,12 @@ function buildCoreFixButton() {
 
   const button = document.createElement("button");
   button.id = "sellcore-corefix-button";
+  button.type = "button";
   button.textContent = "CoreFix";
   button.title = "CoreFix Diagnostic Entry";
   button.style.position = "fixed";
   button.style.left = "12px";
-  button.style.bottom = "82px";
+  button.style.top = "150px";
   button.style.zIndex = "999996";
   button.style.border = "0";
   button.style.borderRadius = "999px";
@@ -277,10 +279,11 @@ function buildCoreFixButton() {
   button.style.color = "#07101d";
   button.style.fontWeight = "950";
   button.style.boxShadow = "0 12px 35px rgba(0,0,0,0.3)";
+  button.style.pointerEvents = "auto";
 
-  button.addEventListener("click", () => {
+  button.onclick = () => {
     buildCoreFixPanel();
-  });
+  };
 
   document.body.appendChild(button);
 }
@@ -296,8 +299,8 @@ export function installCoreFixDiagnosticEntry() {
     }
 
     buildCoreFixButton();
-    console.info("[SellCore Block 016] CoreFix Diagnostic Entry installed.");
+    console.info("[SellCore Block 016A] CoreFix Diagnostic Entry interaction repair installed.");
   } catch (error) {
-    console.warn("[SellCore Block 016] CoreFix failed safely:", error);
+    console.warn("[SellCore Block 016A] CoreFix failed safely:", error);
   }
 }

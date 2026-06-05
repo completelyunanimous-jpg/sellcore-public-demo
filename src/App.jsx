@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import { attachProofPackToListing } from "./lib/listingProofPackBridge.js";
 
-const BLOCK_VERSION = "Foundation 11 ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Save Everything + Media Continuity";
+const BLOCK_VERSION = "Foundation 11 ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Save Everything + Media Continuity";
 const CANONICAL_KEY = "sellcore_optimization_foundation_11_memory";
 const UI_STATE_KEY = "sellcore_optimization_foundation_11_ui_state";
 const DRAFT_STATE_KEY = "sellcore_optimization_foundation_11_drafts";
@@ -92,12 +92,12 @@ const emptyPersonaDraft = {
 };
 
 const BOTTOM_NAV = [
-  { id: "feed", icon: "ÃƒÂ¢Ã…â€™Ã¢â‚¬Å¡", label: "Feed" },
+  { id: "feed", icon: "ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡", label: "Feed" },
   { id: "create", icon: "+", label: "Create" },
-  { id: "market", icon: "ÃƒÂ¢Ã…â€™Ã¢â‚¬Â¢", label: "Market" },
-  { id: "profiles", icon: "ÃƒÂ¢Ã¢â‚¬â€Ã¢â‚¬Â°", label: "Profiles" },
-  { id: "history", icon: "ÃƒÂ¢Ã¢â‚¬Â°Ã‚Â¡", label: "History" },
-  { id: "utilities", icon: "ÃƒÂ¢Ã…Â¡Ã¢â€žÂ¢", label: "Utilities" },
+  { id: "market", icon: "ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬â„¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢", label: "Market" },
+  { id: "profiles", icon: "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬ÂÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°", label: "Profiles" },
+  { id: "history", icon: "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â°Ãƒâ€šÃ‚Â¡", label: "History" },
+  { id: "utilities", icon: "ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã‚Â¡ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢", label: "Utilities" },
 ];
 
 const MARKET_FILTER_ACTIONS = [
@@ -751,7 +751,7 @@ function App() {
     if (pipeline.activeNegotiations.length > 0) nextMoves.push("Request Seller Box or complete deal for active negotiations.");
     if (memory.sellerBoxRequests.length > 0 && stats.completedDeals === 0) nextMoves.push("Complete a deal to increase Verified Value.");
     if (memory.actions.length > 10) nextMoves.push("Export a memory backup after this test run.");
-    if (nextMoves.length === 0) nextMoves.push("Create listing ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ save ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ mark interested ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ offer ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ accept ÃƒÂ¢Ã¢â‚¬Â Ã¢â‚¬â„¢ complete deal.");
+    if (nextMoves.length === 0) nextMoves.push("Create listing ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ save ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ mark interested ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ offer ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ accept ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ complete deal.");
     return nextMoves.slice(0, 5);
   }, [memory, pipeline, stats.completedDeals]);
 
@@ -896,7 +896,7 @@ function App() {
       };
       next = addAction(next, "Request Seller Box", {
         type: "Trust Action",
-        detail: `${labelForListing(current, listingId)} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${boxType}`,
+        detail: `${labelForListing(current, listingId)} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ${boxType}`,
         listingId,
       });
       next = applyAutomation(next, "seller_box_requested", { listingId });
@@ -1246,7 +1246,7 @@ function App() {
       };
       next = addAction(next, "Create Profile Persona", {
         type: "Profile Action",
-        detail: `${persona.displayName} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${persona.personaTitle}`,
+        detail: `${persona.displayName} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ${persona.personaTitle}`,
       });
       return next;
     });
@@ -1290,7 +1290,7 @@ function App() {
     <main className="sellcoreApp blockNineApp blockTenApp">
       <section className="heroPanel blockNineHero compactFeedHero">
         <div className="brandTopIdentity">
-          <p className="eyebrow compactBrandLine">SELLCORE ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Social Marketplace for Daily Goods</p>
+          <p className="eyebrow compactBrandLine">SELLCORE ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â Social Marketplace for Daily Goods</p>
           <p className="compactFoundationLine">Save Everything + Media Continuity</p>
         </div>
 
@@ -1306,7 +1306,7 @@ function App() {
                 setBuilderTrayOpen(false);
               }}
             >
-              <span>ÃƒÂ¢Ã‹Å“Ã‚Â°</span>
+              <span>ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã…â€œÃƒâ€šÃ‚Â°</span>
             </button>
 
             {topMenuOpen && (
@@ -1438,7 +1438,7 @@ function App() {
     <strong>ProofPack {listing.proofPack.proofPackVersion || "020"}</strong>
     <span>Status: {listing.proofPack.verificationStatus || "pending"}</span>
     <span>Condition: {listing.proofPack.condition || "unverified"}</span>
-    <span>Trust Score: {listing.proofPack.trustScore ?? 0}</span>
+    <span>Trust Score: {listing.proofPack.trustScore ?? 0}/100</span>
   </div>
 )}
                     <div className="cardActions" onClick={(event) => event.stopPropagation()}>
@@ -1469,7 +1469,7 @@ function App() {
                 </div>
                 <div className="qualityChecklist">
                   <h3>CoreCard Quality Checklist</h3>
-                  {getQualityChecks(selectedListing, memory).map((check) => <span key={check.label} className={check.pass ? "checkPass" : "checkWait"}>{check.pass ? "ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“" : "ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢"} {check.label}</span>)}
+                  {getQualityChecks(selectedListing, memory).map((check) => <span key={check.label} className={check.pass ? "checkPass" : "checkWait"}>{check.pass ? "ÃƒÆ’Ã‚Â¢Ãƒâ€¦Ã¢â‚¬Å“ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œ" : "ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢"} {check.label}</span>)}
                 </div>
                 <form className="offerForm" onSubmit={createOffer}>
                   <select value={offerDraft.type} onChange={(event) => setOfferDraft({ ...offerDraft, type: event.target.value })}><option>Buy Offer</option><option>Trade Offer</option></select>
@@ -1532,9 +1532,9 @@ function App() {
             <select value={discovery.deal} onChange={(event) => updateDiscovery("deal", event.target.value)}><option>All</option><option>Active offers</option><option>Completed deals</option><option>No active offers</option></select>
             <select value={discovery.sort} onChange={(event) => updateDiscovery("sort", event.target.value)}><option>Newest first</option><option>Price low to high</option><option>Price high to low</option><option>Most active offers</option><option>Saved first</option><option>Trade-open first</option><option>Quality score</option></select>
           </div>
-          <p className="resultLine">Showing {visibleListings.length} of {memory.listings.length} CoreCards ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ Filter action: {discovery.actionFilter}</p>
+          <p className="resultLine">Showing {visibleListings.length} of {memory.listings.length} CoreCards ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ Filter action: {discovery.actionFilter}</p>
           <div className="miniListingStack">
-            {visibleListings.map((listing) => <button key={listing.id} className="miniListingButton" onClick={() => { selectListing(listing.id); setActiveScreen("feed"); }}><strong>{listing.title}</strong><span>{listing.status} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ ${listing.price || "0"} ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {listing.category}</span></button>)}
+            {visibleListings.map((listing) => <button key={listing.id} className="miniListingButton" onClick={() => { selectListing(listing.id); setActiveScreen("feed"); }}><strong>{listing.title}</strong><span>{listing.status} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ ${listing.price || "0"} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ {listing.category}</span></button>)}
             {visibleListings.length === 0 && <p className="emptyState">No matches. Clear discovery or create a new CoreCard.</p>}
           </div>
         </section>
@@ -1609,7 +1609,7 @@ function App() {
             </section>
             <h3>Offers & Trades</h3>
             <div className="offerList">
-              {memory.offers.map((offer) => <article key={offer.id} className={offer.archived ? "offerCard archived" : "offerCard"}><div><span className="statusPill">{offer.status}</span>{offer.archived && <span className="statusPill archived-pill">Archived</span>}</div><h3>{offer.type} ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â {labelForListing(memory, offer.listingId)}</h3><p>{offer.message || "No message."}</p><div className="valueRow"><span>Amount: <strong>${offer.amount || "0"}</strong></span><span>Trade: <strong>{offer.tradeItem || "None"}</strong></span></div><div className="cardActions"><button onClick={() => updateOfferStatus(offer.id, "Active Negotiation", "offer_accepted")}>Accept</button><button onClick={() => updateOfferStatus(offer.id, "Counter Pending", "offer_countered")}>Counter</button><button onClick={() => updateOfferStatus(offer.id, "Closed / Declined", "offer_declined")}>Decline</button><button onClick={() => updateOfferStatus(offer.id, "Completed", "deal_completed")}>Complete Deal</button><button onClick={() => archiveOffer(offer.id, !offer.archived)}>{offer.archived ? "Restore" : "Archive"}</button></div></article>)}
+              {memory.offers.map((offer) => <article key={offer.id} className={offer.archived ? "offerCard archived" : "offerCard"}><div><span className="statusPill">{offer.status}</span>{offer.archived && <span className="statusPill archived-pill">Archived</span>}</div><h3>{offer.type} ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â {labelForListing(memory, offer.listingId)}</h3><p>{offer.message || "No message."}</p><div className="valueRow"><span>Amount: <strong>${offer.amount || "0"}</strong></span><span>Trade: <strong>{offer.tradeItem || "None"}</strong></span></div><div className="cardActions"><button onClick={() => updateOfferStatus(offer.id, "Active Negotiation", "offer_accepted")}>Accept</button><button onClick={() => updateOfferStatus(offer.id, "Counter Pending", "offer_countered")}>Counter</button><button onClick={() => updateOfferStatus(offer.id, "Closed / Declined", "offer_declined")}>Decline</button><button onClick={() => updateOfferStatus(offer.id, "Completed", "deal_completed")}>Complete Deal</button><button onClick={() => archiveOffer(offer.id, !offer.archived)}>{offer.archived ? "Restore" : "Archive"}</button></div></article>)}
               {memory.offers.length === 0 && <p className="emptyState">No offers yet. Open a CoreCard from Feed and create a Buy Offer or Trade Offer.</p>}
             </div>
             <h3>Deal Pipeline</h3>
@@ -1631,7 +1631,7 @@ function App() {
             </div>
             <h2>Private Board Outline</h2>
             <div className="messageOutline">
-              {memory.messageBoardOutline.map((item) => <p key={item}>ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¢ {item}</p>)}
+              {memory.messageBoardOutline.map((item) => <p key={item}>ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â¢ {item}</p>)}
             </div>
             <h2>Memory Guard</h2>
             <div className="memoryControls"><button className="primaryButton" onClick={saveEverything}>Save Everything</button><button onClick={exportMemory}>Export Full Save Backup</button><button onClick={() => importRef.current?.click()}>Import Full Save Backup</button><button onClick={resetDemoMemory}>Reset Demo Memory</button><input ref={importRef} type="file" accept="application/json,.json" onChange={handleImportFile} hidden /></div>

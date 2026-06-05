@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 
-const BLOCK_VERSION = "Foundation 11 — Save Everything + Media Continuity";
+const BLOCK_VERSION = "Foundation 11 - Save Everything + Media Continuity";
 const CANONICAL_KEY = "sellcore_optimization_foundation_11_memory";
 const UI_STATE_KEY = "sellcore_optimization_foundation_11_ui_state";
 const DRAFT_STATE_KEY = "sellcore_optimization_foundation_11_drafts";
@@ -91,12 +91,12 @@ const emptyPersonaDraft = {
 };
 
 const BOTTOM_NAV = [
-  { id: "feed", icon: "⌂", label: "Feed" },
+  { id: "feed", icon: "F", label: "Feed" },
   { id: "create", icon: "+", label: "Create" },
-  { id: "market", icon: "⌕", label: "Market" },
-  { id: "profiles", icon: "◉", label: "Profiles" },
-  { id: "history", icon: "≡", label: "History" },
-  { id: "utilities", icon: "⚙", label: "Utilities" },
+  { id: "market", icon: "M", label: "Market" },
+  { id: "profiles", icon: "P", label: "Profiles" },
+  { id: "history", icon: "H", label: "History" },
+  { id: "utilities", icon: "U", label: "Utilities" },
 ];
 
 const MARKET_FILTER_ACTIONS = [
@@ -750,7 +750,7 @@ function App() {
     if (pipeline.activeNegotiations.length > 0) nextMoves.push("Request Seller Box or complete deal for active negotiations.");
     if (memory.sellerBoxRequests.length > 0 && stats.completedDeals === 0) nextMoves.push("Complete a deal to increase Verified Value.");
     if (memory.actions.length > 10) nextMoves.push("Export a memory backup after this test run.");
-    if (nextMoves.length === 0) nextMoves.push("Create listing → save → mark interested → offer → accept → complete deal.");
+    if (nextMoves.length === 0) nextMoves.push("Create listing â†’ save â†’ mark interested â†’ offer â†’ accept â†’ complete deal.");
     return nextMoves.slice(0, 5);
   }, [memory, pipeline, stats.completedDeals]);
 
@@ -895,7 +895,7 @@ function App() {
       };
       next = addAction(next, "Request Seller Box", {
         type: "Trust Action",
-        detail: `${labelForListing(current, listingId)} — ${boxType}`,
+        detail: `${labelForListing(current, listingId)} â€” ${boxType}`,
         listingId,
       });
       next = applyAutomation(next, "seller_box_requested", { listingId });
@@ -1245,7 +1245,7 @@ function App() {
       };
       next = addAction(next, "Create Profile Persona", {
         type: "Profile Action",
-        detail: `${persona.displayName} — ${persona.personaTitle}`,
+        detail: `${persona.displayName} â€” ${persona.personaTitle}`,
       });
       return next;
     });
@@ -1289,7 +1289,7 @@ function App() {
     <main className="sellcoreApp blockNineApp blockTenApp">
       <section className="heroPanel blockNineHero compactFeedHero">
         <div className="brandTopIdentity">
-          <p className="eyebrow compactBrandLine">SELLCORE — Social Marketplace for Daily Goods</p>
+          <p className="eyebrow compactBrandLine">SELLCORE â€” Social Marketplace for Daily Goods</p>
           <p className="compactFoundationLine">Save Everything + Media Continuity</p>
         </div>
 
@@ -1305,7 +1305,7 @@ function App() {
                 setBuilderTrayOpen(false);
               }}
             >
-              <span>☰</span>
+              <span>â˜°</span>
             </button>
 
             {topMenuOpen && (
@@ -1460,7 +1460,7 @@ function App() {
                 </div>
                 <div className="qualityChecklist">
                   <h3>CoreCard Quality Checklist</h3>
-                  {getQualityChecks(selectedListing, memory).map((check) => <span key={check.label} className={check.pass ? "checkPass" : "checkWait"}>{check.pass ? "✓" : "•"} {check.label}</span>)}
+                  {getQualityChecks(selectedListing, memory).map((check) => <span key={check.label} className={check.pass ? "checkPass" : "checkWait"}>{check.pass ? "âœ“" : "â€¢"} {check.label}</span>)}
                 </div>
                 <form className="offerForm" onSubmit={createOffer}>
                   <select value={offerDraft.type} onChange={(event) => setOfferDraft({ ...offerDraft, type: event.target.value })}><option>Buy Offer</option><option>Trade Offer</option></select>
@@ -1523,9 +1523,9 @@ function App() {
             <select value={discovery.deal} onChange={(event) => updateDiscovery("deal", event.target.value)}><option>All</option><option>Active offers</option><option>Completed deals</option><option>No active offers</option></select>
             <select value={discovery.sort} onChange={(event) => updateDiscovery("sort", event.target.value)}><option>Newest first</option><option>Price low to high</option><option>Price high to low</option><option>Most active offers</option><option>Saved first</option><option>Trade-open first</option><option>Quality score</option></select>
           </div>
-          <p className="resultLine">Showing {visibleListings.length} of {memory.listings.length} CoreCards • Filter action: {discovery.actionFilter}</p>
+          <p className="resultLine">Showing {visibleListings.length} of {memory.listings.length} CoreCards â€¢ Filter action: {discovery.actionFilter}</p>
           <div className="miniListingStack">
-            {visibleListings.map((listing) => <button key={listing.id} className="miniListingButton" onClick={() => { selectListing(listing.id); setActiveScreen("feed"); }}><strong>{listing.title}</strong><span>{listing.status} • ${listing.price || "0"} • {listing.category}</span></button>)}
+            {visibleListings.map((listing) => <button key={listing.id} className="miniListingButton" onClick={() => { selectListing(listing.id); setActiveScreen("feed"); }}><strong>{listing.title}</strong><span>{listing.status} â€¢ ${listing.price || "0"} â€¢ {listing.category}</span></button>)}
             {visibleListings.length === 0 && <p className="emptyState">No matches. Clear discovery or create a new CoreCard.</p>}
           </div>
         </section>
@@ -1600,7 +1600,7 @@ function App() {
             </section>
             <h3>Offers & Trades</h3>
             <div className="offerList">
-              {memory.offers.map((offer) => <article key={offer.id} className={offer.archived ? "offerCard archived" : "offerCard"}><div><span className="statusPill">{offer.status}</span>{offer.archived && <span className="statusPill archived-pill">Archived</span>}</div><h3>{offer.type} — {labelForListing(memory, offer.listingId)}</h3><p>{offer.message || "No message."}</p><div className="valueRow"><span>Amount: <strong>${offer.amount || "0"}</strong></span><span>Trade: <strong>{offer.tradeItem || "None"}</strong></span></div><div className="cardActions"><button onClick={() => updateOfferStatus(offer.id, "Active Negotiation", "offer_accepted")}>Accept</button><button onClick={() => updateOfferStatus(offer.id, "Counter Pending", "offer_countered")}>Counter</button><button onClick={() => updateOfferStatus(offer.id, "Closed / Declined", "offer_declined")}>Decline</button><button onClick={() => updateOfferStatus(offer.id, "Completed", "deal_completed")}>Complete Deal</button><button onClick={() => archiveOffer(offer.id, !offer.archived)}>{offer.archived ? "Restore" : "Archive"}</button></div></article>)}
+              {memory.offers.map((offer) => <article key={offer.id} className={offer.archived ? "offerCard archived" : "offerCard"}><div><span className="statusPill">{offer.status}</span>{offer.archived && <span className="statusPill archived-pill">Archived</span>}</div><h3>{offer.type} â€” {labelForListing(memory, offer.listingId)}</h3><p>{offer.message || "No message."}</p><div className="valueRow"><span>Amount: <strong>${offer.amount || "0"}</strong></span><span>Trade: <strong>{offer.tradeItem || "None"}</strong></span></div><div className="cardActions"><button onClick={() => updateOfferStatus(offer.id, "Active Negotiation", "offer_accepted")}>Accept</button><button onClick={() => updateOfferStatus(offer.id, "Counter Pending", "offer_countered")}>Counter</button><button onClick={() => updateOfferStatus(offer.id, "Closed / Declined", "offer_declined")}>Decline</button><button onClick={() => updateOfferStatus(offer.id, "Completed", "deal_completed")}>Complete Deal</button><button onClick={() => archiveOffer(offer.id, !offer.archived)}>{offer.archived ? "Restore" : "Archive"}</button></div></article>)}
               {memory.offers.length === 0 && <p className="emptyState">No offers yet. Open a CoreCard from Feed and create a Buy Offer or Trade Offer.</p>}
             </div>
             <h3>Deal Pipeline</h3>
@@ -1622,7 +1622,7 @@ function App() {
             </div>
             <h2>Private Board Outline</h2>
             <div className="messageOutline">
-              {memory.messageBoardOutline.map((item) => <p key={item}>• {item}</p>)}
+              {memory.messageBoardOutline.map((item) => <p key={item}>â€¢ {item}</p>)}
             </div>
             <h2>Memory Guard</h2>
             <div className="memoryControls"><button className="primaryButton" onClick={saveEverything}>Save Everything</button><button onClick={exportMemory}>Export Full Save Backup</button><button onClick={() => importRef.current?.click()}>Import Full Save Backup</button><button onClick={resetDemoMemory}>Reset Demo Memory</button><input ref={importRef} type="file" accept="application/json,.json" onChange={handleImportFile} hidden /></div>

@@ -10,6 +10,8 @@ const DATA_DIR = path.join(__dirname, ".sellcore-control");
 const INPUTS_PATH = path.join(DATA_DIR, "terminal-inputs.json");
 const QUEUE_PATH = path.join(DATA_DIR, "terminal-queue.json");
 const EXPANSIONS_PATH = path.join(DATA_DIR, "terminal-expansions.json");
+const FUNNEL_EVENTS_PATH = path.join(DATA_DIR, "term-funnel-events.json");
+const FUNNEL_REPORT_PATH = path.join(DATA_DIR, "term-funnel-report.json");
 
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -232,6 +234,150 @@ function readExpansionSources(payload) {
 
   return readJson(QUEUE_PATH, []).slice(0, limit);
 }
+
+function getTermLineage() {
+  return {
+    term1: {
+      term: 1,
+      name: "Manual GitHub foundation",
+      role: "foundation-source",
+      repos: [
+        "sellcore-command-center",
+        "sellcore-server-01-web-interface",
+        "sellcore-server-02-control-logic"
+      ]
+    },
+    term2: {
+      term: 2,
+      name: "Foundation automation script lane",
+      role: "automation-root",
+      notes: [
+        "retry logic",
+        "resume capability",
+        "error logs",
+        "automation logs",
+        "failure reports"
+      ]
+    },
+    term4: {
+      term: 4,
+      name: "Core Control UI plus ProofPack auto insert",
+      role: "live-feed-source"
+    },
+    terms5to7: {
+      terms: [5, 6, 7],
+      name: "backend intake, expander build, runtime debug",
+      role: "funnel-path"
+    },
+    term8: {
+      term: 8,
+      name: "CONTROL 002 runtime verified expansion storage",
+      role: "verified-target"
+    },
+    term9: {
+      term: 9,
+      name: "Term Funnel plus Lineage Pipeline",
+      role: "pipeline"
+    }
+  };
+}
+
+function normalizeTermNumber(value, fallback) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return fallback;
+  return number;
+}
+
+function normalizeTermArray(value, fallback) {
+  if (!Array.isArray(value)) return fallback;
+  const terms = value
+    .map((item) => Number(item))
+    .filter((item) => Number.isFinite(item));
+  return terms.length > 0 ? terms : fallback;
+}
+
+function createFunnelEvent(payload) {
+  const eventType = safeText(payload.eventType || payload.type, "term_event");
+  const sourceLayer = safeText(payload.sourceLayer || payload.layer, "term4-feed");
+  const status = safeText(payload.status, "queued");
+
+  return {
+    id: `funnel-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
+    sourceTerm: normalizeTermNumber(payload.sourceTerm, 4),
+    sourceLayer,
+    eventType,
+    payload: payload.payload && typeof payload.payload === "object" ? payload.payload : {},
+    funnelTerms: normalizeTermArray(payload.funnelTerms, [5, 6, 7]),
+    targetTerm: normalizeTermNumber(payload.targetTerm, 8),
+    lineageTerms: [1, 2],
+    status,
+    createdAt: nowIso(),
+    updatedAt: nowIso()
+  };
+}
+
+function expandFunnelEvent(event) {
+  const lineage = getTermLineage();
+  const input = `${event.eventType} from term ${event.sourceTerm} via ${event.sourceLayer}`;
+
+  return {
+    id: `funnel-expansion-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
+    sourceRecordId: event.id,
+    sourceType: "term-funnel-event",
+    label: event.eventType,
+    originalInput: input,
+    category: "term-funnel",
+    riskLevel: "low",
+    status: "expanded",
+    goal: `Route term ${event.sourceTerm} event through terms ${event.funnelTerms.join(",")} into term ${event.targetTerm}`,
+    steps: [
+      "Receive term event",
+      "Attach term 1 foundation lineage",
+      "Attach term 2 automation lineage",
+      "Record funnel terms",
+      "Store verified expansion target"
+    ],
+    gates: [
+      "No shell execution",
+      "No frontend mutation",
+      "No broad App.jsx replacement",
+      "ASCII only in source code"
+    ],
+    suggestedNextAction: "Review funnel event and prepare frontend bridge only after backend verification",
+    termLineage: lineage,
+    funnelTrace: {
+      sourceTerm: event.sourceTerm,
+      sourceLayer: event.sourceLayer,
+      funnelTerms: event.funnelTerms,
+      targetTerm: event.targetTerm,
+      lineageTerms: event.lineageTerms
+    },
+    createdAt: nowIso(),
+    updatedAt: nowIso()
+  };
+}
+
+function buildFunnelReport(events, expansions) {
+  const countsByStatus = {};
+  const countsBySourceTerm = {};
+
+  for (const event of events) {
+    countsByStatus[event.status] = (countsByStatus[event.status] || 0) + 1;
+    countsBySourceTerm[event.sourceTerm] = (countsBySourceTerm[event.sourceTerm] || 0) + 1;
+  }
+
+  return {
+    ok: true,
+    term: 9,
+    name: "Term Funnel plus Lineage Pipeline",
+    eventsCount: events.length,
+    expansionsCount: expansions.length,
+    countsByStatus,
+    countsBySourceTerm,
+    lineage: getTermLineage(),
+    updatedAt: nowIso()
+  };
+}
 async function readPayload(req) {
   const raw = await collectBody(req);
   if (!raw.trim()) return {};
@@ -324,7 +470,87 @@ const server = http.createServer(async (req, res) => {
       const records = readExpansionSources(payload);
 
       if (records.length === 0) {
-        sendJson(res, 404, { ok: false, error: "No source records found to expand" });
+    
+    if (req.method === "GET" && url.pathname === "/term-funnel/lineage") {
+      sendJson(res, 200, { ok: true, lineage: getTermLineage() });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/term-funnel/events") {
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      sendJson(res, 200, { ok: true, count: events.length, events });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/term-funnel/events") {
+      const payload = await readPayload(req);
+      const event = createFunnelEvent(payload);
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const next = [event, ...events].slice(0, 200);
+      writeJson(FUNNEL_EVENTS_PATH, next);
+
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport(next, expansions));
+
+      sendJson(res, 201, { ok: true, event, count: next.length });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/term-funnel/expand") {
+      const payload = await readPayload(req);
+      const limit = Math.max(1, Math.min(Number(payload.limit || 10), 50));
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const selected = events.filter((event) => event.status !== "expanded").slice(0, limit);
+
+      if (selected.length === 0) {
+        sendJson(res, 404, { ok: false, error: "No funnel events found to expand" });
+        return;
+      }
+
+      const created = selected.map((event) => expandFunnelEvent(event));
+      const eventIds = new Set(selected.map((event) => event.id));
+      const updatedEvents = events.map((event) => {
+        if (!eventIds.has(event.id)) return event;
+        return {
+          ...event,
+          status: "expanded",
+          updatedAt: nowIso()
+        };
+      });
+
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      const nextExpansions = [...created, ...expansions].slice(0, 200);
+
+      writeJson(FUNNEL_EVENTS_PATH, updatedEvents);
+      writeJson(EXPANSIONS_PATH, nextExpansions);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport(updatedEvents, nextExpansions));
+
+      sendJson(res, 201, {
+        ok: true,
+        createdCount: created.length,
+        expansionsCount: nextExpansions.length,
+        created
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/term-funnel/report") {
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      const report = buildFunnelReport(events, expansions);
+      writeJson(FUNNEL_REPORT_PATH, report);
+      sendJson(res, 200, report);
+      return;
+    }
+
+    if (req.method === "DELETE" && url.pathname === "/term-funnel/events") {
+      writeJson(FUNNEL_EVENTS_PATH, []);
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport([], expansions));
+      sendJson(res, 200, { ok: true, count: 0 });
+      return;
+    }
+    sendJson(res, 404, { ok: false, error: "No source records found to expand" });
         return;
       }
 
@@ -347,6 +573,86 @@ const server = http.createServer(async (req, res) => {
       sendJson(res, 200, { ok: true, count: 0 });
       return;
     }
+
+    if (req.method === "GET" && url.pathname === "/term-funnel/lineage") {
+      sendJson(res, 200, { ok: true, lineage: getTermLineage() });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/term-funnel/events") {
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      sendJson(res, 200, { ok: true, count: events.length, events });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/term-funnel/events") {
+      const payload = await readPayload(req);
+      const event = createFunnelEvent(payload);
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const next = [event, ...events].slice(0, 200);
+      writeJson(FUNNEL_EVENTS_PATH, next);
+
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport(next, expansions));
+
+      sendJson(res, 201, { ok: true, event, count: next.length });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/term-funnel/expand") {
+      const payload = await readPayload(req);
+      const limit = Math.max(1, Math.min(Number(payload.limit || 10), 50));
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const selected = events.filter((event) => event.status !== "expanded").slice(0, limit);
+
+      if (selected.length === 0) {
+        sendJson(res, 404, { ok: false, error: "No funnel events found to expand" });
+        return;
+      }
+
+      const created = selected.map((event) => expandFunnelEvent(event));
+      const eventIds = new Set(selected.map((event) => event.id));
+      const updatedEvents = events.map((event) => {
+        if (!eventIds.has(event.id)) return event;
+        return {
+          ...event,
+          status: "expanded",
+          updatedAt: nowIso()
+        };
+      });
+
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      const nextExpansions = [...created, ...expansions].slice(0, 200);
+
+      writeJson(FUNNEL_EVENTS_PATH, updatedEvents);
+      writeJson(EXPANSIONS_PATH, nextExpansions);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport(updatedEvents, nextExpansions));
+
+      sendJson(res, 201, {
+        ok: true,
+        createdCount: created.length,
+        expansionsCount: nextExpansions.length,
+        created
+      });
+      return;
+    }
+
+    if (req.method === "GET" && url.pathname === "/term-funnel/report") {
+      const events = readJson(FUNNEL_EVENTS_PATH, []);
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      const report = buildFunnelReport(events, expansions);
+      writeJson(FUNNEL_REPORT_PATH, report);
+      sendJson(res, 200, report);
+      return;
+    }
+
+    if (req.method === "DELETE" && url.pathname === "/term-funnel/events") {
+      writeJson(FUNNEL_EVENTS_PATH, []);
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      writeJson(FUNNEL_REPORT_PATH, buildFunnelReport([], expansions));
+      sendJson(res, 200, { ok: true, count: 0 });
+      return;
+    }
     sendJson(res, 404, {
       ok: false,
       error: "Route not found",
@@ -360,7 +666,13 @@ const server = http.createServer(async (req, res) => {
         "DELETE /terminal/queue",
         "GET /terminal/expansions",
         "POST /terminal/expand",
-        "DELETE /terminal/expansions"
+        "DELETE /terminal/expansions",
+        "GET /term-funnel/lineage",
+        "GET /term-funnel/events",
+        "POST /term-funnel/events",
+        "POST /term-funnel/expand",
+        "GET /term-funnel/report",
+        "DELETE /term-funnel/events"
       ]
     });
   } catch (error) {

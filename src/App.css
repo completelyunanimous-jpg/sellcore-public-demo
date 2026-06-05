@@ -505,7 +505,7 @@ h3 {
   }
 }
 
-/* Block 8 â€” Discovery + Trust Marketplace Expansion */
+/* Block 8 — Discovery + Trust Marketplace Expansion */
 .discoveryPanel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -588,7 +588,7 @@ h3 {
 }
 
 
-/* 09 â€” Profile Navigation + Marketplace Polish */
+/* 09 — Profile Navigation + Marketplace Polish */
 .blockNineApp {
   padding-bottom: 108px;
 }
@@ -778,7 +778,7 @@ h3 {
 
 
 /* =========================================
-   10 â€” Profile Media + Feed Output
+   10 — Profile Media + Feed Output
    Preserves Foundation 09 mobile polish while adding camera/images
    ========================================= */
 :root {
@@ -2511,51 +2511,4 @@ body {
   margin-top: 2px;
   font-size: 0.68rem;
   opacity: 0.68;
-}
-
-/* BLOCK 021 — Feed Visual Stabilizer */
-.commandOrbButton {
-  right: 14px;
-  bottom: 118px;
-  width: 52px;
-  height: 52px;
-  font-size: 0.62rem;
-  opacity: 0.92;
-}
-
-.commandOrbPanel {
-  right: 14px;
-  bottom: 178px;
-  width: min(220px, calc(100vw - 28px));
-  padding: 10px;
-  gap: 7px;
-}
-
-.commandOrbAction {
-  padding: 8px 9px;
-  border-radius: 13px;
-}
-
-.commandOrbAction strong {
-  font-size: 0.7rem;
-}
-
-.commandOrbAction span {
-  font-size: 0.62rem;
-}
-
-@media (max-width: 640px) {
-  .commandOrbButton {
-    right: 12px;
-    bottom: 104px;
-    width: 46px;
-    height: 46px;
-    font-size: 0.56rem;
-  }
-
-  .commandOrbPanel {
-    right: 10px;
-    bottom: 156px;
-    width: min(205px, calc(100vw - 20px));
-  }
 }

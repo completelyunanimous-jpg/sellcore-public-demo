@@ -9,6 +9,7 @@ const PORT = Number(process.env.SELLCORE_CONTROL_PORT || process.env.PORT || 410
 const DATA_DIR = path.join(__dirname, ".sellcore-control");
 const INPUTS_PATH = path.join(DATA_DIR, "terminal-inputs.json");
 const QUEUE_PATH = path.join(DATA_DIR, "terminal-queue.json");
+const EXPANSIONS_PATH = path.join(DATA_DIR, "terminal-expansions.json");
 
 function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
@@ -83,6 +84,154 @@ function makeRecord(payload, type) {
   };
 }
 
+
+function chooseExpansionCategory(input) {
+  const text = input.toLowerCase();
+
+  if (text.includes("frontend") || text.includes("interface") || text.includes("css") || text.includes("app.jsx") || text.includes("panel") || text.includes("ui")) {
+    return "frontend-edit";
+  }
+
+  if (text.includes("backend") || text.includes("server") || text.includes("route") || text.includes("api") || text.includes("terminal") || text.includes("control")) {
+    return "backend-control";
+  }
+
+  if (text.includes("build") || text.includes("test") || text.includes("verify") || text.includes("snapshot") || text.includes("check")) {
+    return "verification";
+  }
+
+  if (text.includes("deploy") || text.includes("github") || text.includes("push") || text.includes("pages")) {
+    return "deployment";
+  }
+
+  return "general-control";
+}
+
+function chooseRiskLevel(input) {
+  const text = input.toLowerCase();
+
+  if (text.includes("execute") || text.includes("delete") || text.includes("reset") || text.includes("force") || text.includes("shell") || text.includes("crypto")) {
+    return "high";
+  }
+
+  if (text.includes("edit") || text.includes("connect") || text.includes("patch") || text.includes("route") || text.includes("backend") || text.includes("frontend")) {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function buildExpansionSteps(category) {
+  if (category === "frontend-edit") {
+    return [
+      "Inspect frontend anchors before editing",
+      "Patch only the confirmed JSX or CSS section",
+      "Protect bottom navigation and Core Control behavior",
+      "Run npm run build",
+      "Commit only after build passes"
+    ];
+  }
+
+  if (category === "backend-control") {
+    return [
+      "Inspect backend control terminal routes",
+      "Add or update safe storage routes only",
+      "Avoid shell execution",
+      "Run npm run control:check",
+      "Run npm run build",
+      "Commit only after checks pass"
+    ];
+  }
+
+  if (category === "verification") {
+    return [
+      "Run git status and git log checks",
+      "Run npm run control:check if backend files changed",
+      "Run npm run build",
+      "Create a protected snapshot if requested",
+      "Record the verified commit and output"
+    ];
+  }
+
+  if (category === "deployment") {
+    return [
+      "Confirm local build passes",
+      "Confirm git status is clean",
+      "Push only verified commits",
+      "Check remote head after push",
+      "Do not force push unless explicitly approved"
+    ];
+  }
+
+  return [
+    "Inspect current repository state",
+    "Find exact anchors before editing",
+    "Apply the smallest safe patch",
+    "Run syntax or build verification",
+    "Commit only after verification passes"
+  ];
+}
+
+function buildExpansionGates(category, riskLevel) {
+  const gates = [
+    "No broad App.jsx replacement",
+    "ASCII only in source code",
+    "Build or syntax check before commit",
+    "No shell execution from saved inputs"
+  ];
+
+  if (riskLevel === "high") {
+    gates.push("Require manual approval before implementation");
+  }
+
+  if (category === "frontend-edit") {
+    gates.push("Bottom navigation must remain protected");
+  }
+
+  if (category === "backend-control") {
+    gates.push("Backend routes must remain safe storage only");
+  }
+
+  return gates;
+}
+
+function expandRecord(record) {
+  const input = safeText(record.input);
+  const category = chooseExpansionCategory(input);
+  const riskLevel = chooseRiskLevel(input);
+
+  return {
+    id: `expansion-${Date.now()}-${crypto.randomBytes(4).toString("hex")}`,
+    sourceRecordId: record.id || null,
+    sourceType: record.type || "unknown",
+    label: record.label || "untitled",
+    originalInput: input,
+    category,
+    riskLevel,
+    status: riskLevel === "high" ? "needs-review" : "expanded",
+    goal: input,
+    steps: buildExpansionSteps(category),
+    gates: buildExpansionGates(category, riskLevel),
+    suggestedNextAction: `Inspect and prepare a safe ${category} patch`,
+    createdAt: nowIso(),
+    updatedAt: nowIso()
+  };
+}
+
+function readExpansionSources(payload) {
+  const source = safeText(payload.source, "queue");
+  const limit = Math.max(1, Math.min(Number(payload.limit || 5), 25));
+
+  if (source === "inputs") {
+    return readJson(INPUTS_PATH, []).slice(0, limit);
+  }
+
+  if (source === "all") {
+    return [...readJson(QUEUE_PATH, []), ...readJson(INPUTS_PATH, [])].slice(0, limit);
+  }
+
+  return readJson(QUEUE_PATH, []).slice(0, limit);
+}
 async function readPayload(req) {
   const raw = await collectBody(req);
   if (!raw.trim()) return {};
@@ -163,6 +312,41 @@ const server = http.createServer(async (req, res) => {
       return;
     }
 
+
+    if (req.method === "GET" && url.pathname === "/terminal/expansions") {
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      sendJson(res, 200, { ok: true, count: expansions.length, expansions });
+      return;
+    }
+
+    if (req.method === "POST" && url.pathname === "/terminal/expand") {
+      const payload = await readPayload(req);
+      const records = readExpansionSources(payload);
+
+      if (records.length === 0) {
+        sendJson(res, 404, { ok: false, error: "No source records found to expand" });
+        return;
+      }
+
+      const created = records.map((record) => expandRecord(record));
+      const expansions = readJson(EXPANSIONS_PATH, []);
+      const next = [...created, ...expansions].slice(0, 100);
+      writeJson(EXPANSIONS_PATH, next);
+
+      sendJson(res, 201, {
+        ok: true,
+        count: next.length,
+        createdCount: created.length,
+        created
+      });
+      return;
+    }
+
+    if (req.method === "DELETE" && url.pathname === "/terminal/expansions") {
+      writeJson(EXPANSIONS_PATH, []);
+      sendJson(res, 200, { ok: true, count: 0 });
+      return;
+    }
     sendJson(res, 404, {
       ok: false,
       error: "Route not found",
@@ -173,7 +357,10 @@ const server = http.createServer(async (req, res) => {
         "DELETE /terminal/inputs",
         "GET /terminal/queue",
         "POST /terminal/queue",
-        "DELETE /terminal/queue"
+        "DELETE /terminal/queue",
+        "GET /terminal/expansions",
+        "POST /terminal/expand",
+        "DELETE /terminal/expansions"
       ]
     });
   } catch (error) {

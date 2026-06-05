@@ -13,3 +13,5 @@ createRoot(document.getElementById("root")).render(
 
 setTimeout(() => installChronologicalArtificialOrganizer(), 600);
 
+
+installSellCoreCoreFixBridge();

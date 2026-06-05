@@ -7,6 +7,7 @@ const CANONICAL_KEY = "sellcore_optimization_foundation_11_memory";
 const UI_STATE_KEY = "sellcore_optimization_foundation_11_ui_state";
 const DRAFT_STATE_KEY = "sellcore_optimization_foundation_11_drafts";
 const LAST_SAVE_KEY = "sellcore_optimization_foundation_11_last_full_save";
+const CORE_ORB_POSITION_KEY = "sellcore_block_021_orb_position";
 const LEGACY_KEY_HINTS = ["sellcore", "corecard", "foundation", "listing", "offer"];
 
 const emptyListing = {
@@ -178,6 +179,47 @@ function safeParse(value) {
     return JSON.parse(value);
   } catch {
     return null;
+  }
+
+  function clampCoreOrbPosition(x, y) {
+    const size = 72;
+    const pad = 10;
+    const bottomSafe = 118;
+    const maxX = Math.max(pad, window.innerWidth - size - pad);
+    const maxY = Math.max(pad, window.innerHeight - size - bottomSafe);
+    return {
+      x: Math.min(Math.max(x, pad), maxX),
+      y: Math.min(Math.max(y, pad), maxY)
+    };
+  }
+
+  function beginCoreOrbMove(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    coreOrbDragRef.current = {
+      pointerId: event.pointerId,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      moved: false,
+      latest: null
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveCoreOrb(event) {
+    const drag = coreOrbDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const next = clampCoreOrbPosition(event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+    drag.moved = true;
+    drag.latest = next;
+    setCoreOrbPosition(next);
+  }
+
+  function endCoreOrbMove(event) {
+    const drag = coreOrbDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag.latest) {
+      localStorage.setItem(CORE_ORB_POSITION_KEY, JSON.stringify(drag.latest));
+    }
   }
 }
 
@@ -664,9 +706,15 @@ function App() {
   const [lastFullSaveAt, setLastFullSaveAt] = useState(() => localStorage.getItem(LAST_SAVE_KEY) || "");
   const [builderTrayOpen, setBuilderTrayOpen] = useState(false);
   const [topMenuOpen, setTopMenuOpen] = useState(false);
+  const [corePanelOpen, setCorePanelOpen] = useState(false);
+  const [coreOrbPosition, setCoreOrbPosition] = useState(() => {
+    const saved = safeParse(localStorage.getItem(CORE_ORB_POSITION_KEY));
+    return saved && typeof saved.x === "number" && typeof saved.y === "number" ? saved : null;
+  });
   const importRef = useRef(null);
   const listingImageRef = useRef(null);
   const personaAvatarRef = useRef(null);
+  const coreOrbDragRef = useRef(null);
   const personaBannerRef = useRef(null);
   const activeAvatarRef = useRef(null);
   const activeBannerRef = useRef(null);
@@ -1302,7 +1350,8 @@ function App() {
               aria-label="Open SellCore feed menu"
               aria-expanded={topMenuOpen}
               onClick={() => {
-                setTopMenuOpen((open) => !open);
+                setCorePanelOpen((open) => !open);
+                setTopMenuOpen(false);
                 setBuilderTrayOpen(false);
               }}
             >
@@ -1369,8 +1418,9 @@ function App() {
               className="builderToggleButton"
               aria-expanded={builderTrayOpen}
               onClick={() => {
-                setBuilderTrayOpen((open) => !open);
+                setCorePanelOpen((open) => !open);
                 setTopMenuOpen(false);
+                setBuilderTrayOpen(false);
               }}
             >
               SellCore Builders

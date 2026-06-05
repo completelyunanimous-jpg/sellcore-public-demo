@@ -3,6 +3,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { installSellCoreCoreFixBridge } from "./lib/sellCoreCoreFixBridge.js";
+import { installProofPackAutoInsert } from "./lib/proofPackAutoInsert.js";
 import App from "./App.jsx";
 
 createRoot(document.getElementById("root")).render(
@@ -16,3 +17,4 @@ setTimeout(() => installChronologicalArtificialOrganizer(), 600);
 
 
 installSellCoreCoreFixBridge();
+installProofPackAutoInsert();

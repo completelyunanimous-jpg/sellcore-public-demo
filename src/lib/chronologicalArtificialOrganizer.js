@@ -1,4 +1,4 @@
-const STORAGE_KEY = "sellcore:chronological-artificial-organizer";
+﻿const STORAGE_KEY = "sellcore:chronological-artificial-organizer";
 const POSITION_KEY = "sellcore:cao:floating-position";
 const LOCK_KEY = "sellcore:cao:locked";
 

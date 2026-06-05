@@ -2493,3 +2493,41 @@ body,
 .productLogicSocket {
   display: contents;
 }
+
+/* BLOCK 022 — ProofPack Visual Layer */
+
+.proofPackBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 6px 9px;
+  border-radius: 999px;
+  border: 1px solid rgba(243, 199, 95, 0.35);
+  background: rgba(243, 199, 95, 0.1);
+  color: #f3c75f;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.proofPackMeta {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 9px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.045);
+  font-size: 0.68rem;
+}
+
+.proofPackMeta span {
+  opacity: 0.72;
+}
+
+.proofPackMeta strong {
+  opacity: 0.95;
+}

@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { normalizeProofPack } from "./lib/proofPackLayer.js";
 import "./App.css";
 
 const BLOCK_VERSION = "Foundation 11 — Save Everything + Media Continuity";
@@ -282,7 +281,6 @@ function normalizeMemory(raw) {
     imageAlt: item.imageAlt || item.alt || item.title || "",
     createdAt: item.createdAt || nowIso(),
     updatedAt: item.updatedAt || item.createdAt || nowIso(),
-    proofPack: normalizeProofPack(item.proofPack),
   }));
 
   const offers = asArray(source.offers).map((offer, index) => ({

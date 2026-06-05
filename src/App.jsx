@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
+import { attachProofPackToListing } from "./lib/listingProofPackBridge.js";
 
 const BLOCK_VERSION = "Foundation 11 — Save Everything + Media Continuity";
 const CANONICAL_KEY = "sellcore_optimization_foundation_11_memory";
@@ -820,7 +821,7 @@ function App() {
     const title = listingDraft.title.trim();
     if (!title) return;
     mutate((current) => {
-      const listing = {
+      const listing = attachProofPackToListing({
         ...listingDraft,
         id: makeId("listing"),
         title,
@@ -829,7 +830,7 @@ function App() {
         interestCount: 0,
         createdAt: nowIso(),
         updatedAt: nowIso(),
-      };
+      });
       let next = {
         ...current,
         listings: [listing, ...current.listings],

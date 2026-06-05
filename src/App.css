@@ -2703,3 +2703,98 @@ body {
     grid-template-columns: 1fr !important;
   }
 }
+.backendMobileTerminalShell {
+  margin-top: 14px;
+  padding: 13px;
+  border-radius: 18px;
+  border: 1px solid rgba(244, 201, 107, 0.22);
+  background: rgba(8, 13, 24, 0.62);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.backendMobileTerminalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+
+.backendMobileTerminalHeader h3 {
+  margin: 2px 0 0;
+  font-size: 1rem;
+}
+
+.backendMobileTerminalHeader span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 201, 107, 0.22);
+  color: var(--gold-2);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.backendMobileTerminalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.backendMobileTerminalTile {
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.backendMobileTerminalTile span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.7rem;
+  margin-bottom: 4px;
+}
+
+.backendMobileTerminalTile strong {
+  color: var(--gold-2);
+  font-size: 0.82rem;
+}
+
+.backendMobileTerminalActions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.backendMobileTerminalActions button {
+  min-height: 34px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.backendMobileTerminalActions button:disabled {
+  opacity: 0.68;
+  cursor: not-allowed;
+}
+
+.backendMobileTerminalNote {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.35;
+}
+
+@media (max-width: 760px) {
+  .backendMobileTerminalGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .backendMobileTerminalActions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

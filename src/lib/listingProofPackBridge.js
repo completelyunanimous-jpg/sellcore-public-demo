@@ -1,4 +1,4 @@
-﻿import { createProofPack } from "./proofPackContract.js";
+import { createProofPack } from "./proofPackContract.js";
 import { recordSellCoreAction } from "./sellcoreActionControlCenter.js";
 
 export function attachProofPackToListing(listing = {}) {

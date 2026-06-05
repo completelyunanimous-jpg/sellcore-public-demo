@@ -864,6 +864,47 @@ function App() {
     setMemory((current) => normalizeMemory(recipe(normalizeMemory(current))));
   }
 
+  function clampCoreOrbPosition(x, y) {
+    const size = 68;
+    const pad = 12;
+    const bottomSafe = 122;
+    const maxX = Math.max(pad, window.innerWidth - size - pad);
+    const maxY = Math.max(pad, window.innerHeight - size - bottomSafe);
+    return {
+      x: Math.min(Math.max(x, pad), maxX),
+      y: Math.min(Math.max(y, pad), maxY)
+    };
+  }
+
+  function beginCoreOrbMove(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    coreOrbDragRef.current = {
+      pointerId: event.pointerId,
+      offsetX: event.clientX - rect.left,
+      offsetY: event.clientY - rect.top,
+      moved: false,
+      latest: null
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+
+  function moveCoreOrb(event) {
+    const drag = coreOrbDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    const next = clampCoreOrbPosition(event.clientX - drag.offsetX, event.clientY - drag.offsetY);
+    drag.moved = true;
+    drag.latest = next;
+    setCoreOrbPosition(next);
+  }
+
+  function endCoreOrbMove(event) {
+    const drag = coreOrbDragRef.current;
+    if (!drag || drag.pointerId !== event.pointerId) return;
+    if (drag.latest) {
+      localStorage.setItem(CORE_ORB_POSITION_KEY, JSON.stringify(drag.latest));
+    }
+  }
+
   function createListing(event) {
     event.preventDefault();
     const title = listingDraft.title.trim();
@@ -1679,6 +1720,93 @@ function App() {
             <div className="memoryControls"><button className="primaryButton" onClick={saveEverything}>Save Everything</button><button onClick={exportMemory}>Export Full Save Backup</button><button onClick={() => importRef.current?.click()}>Import Full Save Backup</button><button onClick={resetDemoMemory}>Reset Demo Memory</button><input ref={importRef} type="file" accept="application/json,.json" onChange={handleImportFile} hidden /></div>
           </aside>
         </section>
+      )}
+
+      <button
+        type="button"
+        className="coreFloatingOrb"
+        aria-label="Open Core control panel"
+        aria-expanded={corePanelOpen}
+        style={coreOrbPosition ? { left: coreOrbPosition.x, top: coreOrbPosition.y, right: "auto", bottom: "auto" } : undefined}
+        onPointerDown={beginCoreOrbMove}
+        onPointerMove={moveCoreOrb}
+        onPointerUp={endCoreOrbMove}
+        onPointerCancel={endCoreOrbMove}
+        onClick={() => {
+          if (coreOrbDragRef.current?.moved) {
+            coreOrbDragRef.current = null;
+            return;
+          }
+          setCorePanelOpen((open) => !open);
+          setTopMenuOpen(false);
+          setBuilderTrayOpen(false);
+        }}
+      >
+        <span>CORE</span>
+      </button>
+
+      {corePanelOpen && (
+        <button
+          type="button"
+          className="coreUnifiedBackdrop"
+          aria-label="Close Core control panel"
+          onClick={() => setCorePanelOpen(false)}
+        />
+      )}
+
+      {corePanelOpen && (
+        <aside className="coreUnifiedPanel" aria-label="SellCore unified control panel">
+          <div className="coreUnifiedPanelHeader">
+            <div>
+              <p className="eyebrow">SellCore Control</p>
+              <h2>Command Panel</h2>
+            </div>
+            <button type="button" onClick={() => setCorePanelOpen(false)}>Close</button>
+          </div>
+
+          <div className="coreUnifiedGrid">
+            <button type="button" onClick={() => { setActiveScreen("feed"); setShowSavedOnly(false); setCorePanelOpen(false); }}>
+              <span>Listings</span>
+              <strong>{stats.listings}</strong>
+            </button>
+            <button type="button" onClick={() => { setActiveScreen("market"); setShowSavedOnly(false); setCorePanelOpen(false); }}>
+              <span>Active Deals</span>
+              <strong>{stats.activeDeals}</strong>
+            </button>
+            <button type="button" onClick={() => { setActiveScreen("feed"); setShowSavedOnly(true); updateDiscovery("saved", "Saved only"); setCorePanelOpen(false); }}>
+              <span>Saved</span>
+              <strong>{stats.saved}</strong>
+            </button>
+            <button type="button" onClick={() => { setActiveScreen("profiles"); setCorePanelOpen(false); }}>
+              <span>Personas</span>
+              <strong>{stats.personas}</strong>
+            </button>
+            <button type="button" onClick={() => { setActiveScreen("history"); setCorePanelOpen(false); }}>
+              <span>History</span>
+              <strong>{stats.actions}</strong>
+            </button>
+            <button type="button" onClick={() => { setActiveScreen("utilities"); setCorePanelOpen(false); }}>
+              <span>Utilities</span>
+              <strong>{stats.mediaAssets}</strong>
+            </button>
+          </div>
+
+          <div className="coreUnifiedPanelSection">
+            <p className="eyebrow">Builder Layer</p>
+            <div className="coreUnifiedStatusRow">
+              <span>ProofPack</span>
+              <strong>Block 020 active</strong>
+            </div>
+            <div className="coreUnifiedStatusRow">
+              <span>CoreFix</span>
+              <strong>Bridge active</strong>
+            </div>
+            <div className="coreUnifiedStatusRow">
+              <span>Bottom nav</span>
+              <strong>Protected</strong>
+            </div>
+          </div>
+        </aside>
       )}
 
       <nav className="bottomIconNav" aria-label="SellCore bottom navigation">

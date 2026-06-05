@@ -2469,7 +2469,7 @@ body {
   background: radial-gradient(circle at 35% 30%, rgba(255, 226, 161, 0.34), rgba(10, 24, 43, 0.94) 58%);
   color: var(--gold-2);
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.44), 0 0 30px rgba(244, 201, 107, 0.18);
-  z-index: 180;
+  z-index: 1200;
   display: grid;
   place-items: center;
   padding: 0;
@@ -2494,7 +2494,7 @@ body {
   border: 0;
   padding: 0;
   background: rgba(0, 0, 0, 0.26);
-  z-index: 150;
+  z-index: 1100;
 }
 
 .coreUnifiedPanel {
@@ -2505,7 +2505,7 @@ body {
   width: min(45vw, 520px);
   min-width: 360px;
   overflow: auto;
-  z-index: 170;
+  z-index: 1190;
   border: 1px solid rgba(244, 201, 107, 0.24);
   border-radius: 24px;
   background: rgba(7, 17, 31, 0.96);
@@ -2600,5 +2600,34 @@ body {
 
   .coreUnifiedGrid {
     grid-template-columns: 1fr;
+  }
+}
+/* BLOCK 021A - Orb Visibility Fix */
+
+.coreFloatingOrb {
+  z-index: 1200 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+}
+
+.coreUnifiedBackdrop {
+  z-index: 1100 !important;
+}
+
+.coreUnifiedPanel {
+  z-index: 1190 !important;
+}
+
+.bottomIconNav {
+  z-index: 1300 !important;
+}
+
+@media (max-width: 760px) {
+  .coreFloatingOrb {
+    right: 16px !important;
+    bottom: calc(var(--sellcore-bottom-nav-height, 58px) + 68px) !important;
+    width: 64px !important;
+    height: 64px !important;
   }
 }

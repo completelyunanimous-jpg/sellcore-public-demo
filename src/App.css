@@ -2631,3 +2631,75 @@ body {
     height: 64px !important;
   }
 }
+/* BLOCK 021B - Unified Control Tab */
+
+.sideMenuControl {
+  display: none !important;
+}
+
+.builderTopControl {
+  min-width: min(46vw, 210px);
+}
+
+.builderToggleButton {
+  min-width: min(46vw, 210px) !important;
+  min-height: 38px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 999px !important;
+  border-color: rgba(244, 201, 107, 0.36) !important;
+  background: linear-gradient(135deg, rgba(244, 201, 107, 0.16), rgba(9, 22, 39, 0.72)) !important;
+  color: var(--gold-2) !important;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.32) !important;
+  letter-spacing: 0.08em !important;
+  font-weight: 850 !important;
+}
+
+.builderTray,
+.sideMenuTray {
+  display: none !important;
+}
+
+.coreUnifiedPanel {
+  width: min(45vw, 540px) !important;
+}
+
+.coreUnifiedGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.bottomIconNav {
+  z-index: 1300 !important;
+}
+
+@media (max-width: 760px) {
+  .controlsTopRight {
+    flex: 0 0 auto !important;
+    max-width: 50% !important;
+  }
+
+  .builderTopControl {
+    min-width: 132px;
+  }
+
+  .builderToggleButton {
+    min-width: 132px !important;
+    max-width: 148px !important;
+    min-height: 34px !important;
+    padding: 7px 10px !important;
+    font-size: 0.52rem !important;
+    letter-spacing: 0.055em !important;
+  }
+
+  .coreUnifiedPanel {
+    top: 68px !important;
+    right: 8px !important;
+    bottom: calc(var(--sellcore-bottom-nav-height, 58px) + 12px) !important;
+    width: min(92vw, 392px) !important;
+  }
+
+  .coreUnifiedGrid {
+    grid-template-columns: 1fr !important;
+  }
+}

@@ -1464,7 +1464,7 @@ function App() {
                 setBuilderTrayOpen(false);
               }}
             >
-              SellCore Builders
+              Core Control
             </button>
 
             {builderTrayOpen && (

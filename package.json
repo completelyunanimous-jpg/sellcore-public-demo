@@ -1,19 +1,21 @@
 {
-  "name": "sellcore-public-demo",
-  "private": false,
-  "version": "0.0.1",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "dependencies": {
-    "react": "latest",
-    "react-dom": "latest"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-react": "latest",
-    "vite": "latest"
-  }
+    "name":  "sellcore-public-demo",
+    "private":  false,
+    "version":  "0.0.1",
+    "type":  "module",
+    "scripts":  {
+                    "dev":  "vite",
+                    "build":  "vite build",
+                    "preview":  "vite preview",
+                    "control":  "node sellcore-control-terminal.js",
+                    "control:check":  "node --check sellcore-control-terminal.js"
+                },
+    "dependencies":  {
+                         "react":  "latest",
+                         "react-dom":  "latest"
+                     },
+    "devDependencies":  {
+                            "@vitejs/plugin-react":  "latest",
+                            "vite":  "latest"
+                        }
 }

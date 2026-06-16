@@ -1,0 +1,313 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+  background: #020617;
+  color: #f8fafc;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    sans-serif;
+}
+
+button {
+  font: inherit;
+}
+
+.appShell {
+  min-height: 100vh;
+  padding: 14px;
+  padding-bottom: 96px;
+  background:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.22), transparent 34%),
+    radial-gradient(circle at 80% 10%, rgba(132, 204, 22, 0.16), transparent 28%),
+    linear-gradient(180deg, #020617, #030712 60%, #020617);
+}
+
+.heroCard,
+.sectionBlock {
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(15, 23, 42, 0.74);
+  backdrop-filter: blur(18px);
+  border-radius: 28px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+.heroCard {
+  padding: 18px;
+  overflow: hidden;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #67e8f9;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  font-weight: 900;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0;
+  font-size: clamp(1.5rem, 7vw, 2.35rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.cellLogo {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle, #67e8f9, #2563eb 55%, #020617 100%);
+  color: white;
+  font-size: 2rem;
+  font-weight: 900;
+  box-shadow: 0 0 36px rgba(34, 211, 238, 0.5);
+}
+
+.coreOrbWrap {
+  position: relative;
+  height: 245px;
+  display: grid;
+  place-items: center;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 1px solid rgba(103, 232, 249, 0.24);
+}
+
+.ringOne {
+  width: 210px;
+  height: 210px;
+  animation: spin 18s linear infinite;
+}
+
+.ringTwo {
+  width: 150px;
+  height: 150px;
+  border-color: rgba(132, 204, 22, 0.28);
+  animation: spin 12s linear infinite reverse;
+}
+
+.coreOrb {
+  position: relative;
+  width: 138px;
+  height: 138px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding: 16px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 20%, #ffffff, #67e8f9 18%, #1d4ed8 58%, #020617);
+  box-shadow:
+    0 0 45px rgba(34, 211, 238, 0.45),
+    inset 0 0 28px rgba(255, 255, 255, 0.18);
+}
+
+.coreOrb span {
+  font-size: 1.4rem;
+}
+
+.coreOrb h2 {
+  margin: 0;
+  font-size: 0.72rem;
+}
+
+.coreOrb strong {
+  font-size: 1.05rem;
+}
+
+.coreOrb p {
+  margin: 0;
+  font-size: 0.62rem;
+  color: #dbeafe;
+}
+
+.primaryLaunch {
+  width: 100%;
+  border: 0;
+  border-radius: 20px;
+  padding: 15px 16px;
+  color: #020617;
+  background: linear-gradient(135deg, #67e8f9, #a7f3d0);
+  font-weight: 950;
+  box-shadow: 0 14px 35px rgba(34, 211, 238, 0.25);
+}
+
+.primaryLaunch span {
+  margin-right: 8px;
+}
+
+.pipelineStrip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 9px;
+  margin-top: 14px;
+}
+
+.pipelineStrip div {
+  padding: 11px;
+  border-radius: 18px;
+  background: rgba(2, 6, 23, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.pipelineStrip span {
+  display: block;
+  color: #94a3b8;
+  font-size: 0.67rem;
+}
+
+.pipelineStrip strong {
+  font-size: 0.82rem;
+}
+
+.sectionBlock {
+  margin-top: 14px;
+  padding: 16px;
+}
+
+.sectionHead h2 {
+  margin-bottom: 12px;
+  font-size: 1.25rem;
+  letter-spacing: -0.04em;
+}
+
+.actionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.actionGrid button {
+  min-height: 58px;
+  border: 1px solid rgba(103, 232, 249, 0.2);
+  border-radius: 20px;
+  color: #f8fafc;
+  background: rgba(2, 6, 23, 0.62);
+  font-weight: 850;
+}
+
+.moduleList {
+  display: grid;
+  gap: 10px;
+}
+
+.moduleCard {
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 22px;
+  background: rgba(2, 6, 23, 0.58);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.moduleIcon {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 17px;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 1.4rem;
+}
+
+.moduleText h3 {
+  margin: 0;
+  font-size: 0.96rem;
+}
+
+.moduleText p {
+  margin: 3px 0 0;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.moduleCard button {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 12px;
+  color: #020617;
+  background: #f8fafc;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.installBox p {
+  color: #cbd5e1;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+code {
+  color: #a7f3d0;
+}
+
+.fileStack {
+  display: grid;
+  gap: 8px;
+}
+
+.fileStack code {
+  display: block;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(2, 6, 23, 0.78);
+  font-size: 0.75rem;
+}
+
+.bottomDock {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 10px;
+  border-radius: 24px;
+  background: rgba(2, 6, 23, 0.88);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.55);
+}
+
+.bottomDock button {
+  border: 0;
+  border-radius: 16px;
+  padding: 11px 6px;
+  color: #f8fafc;
+  background: rgba(15, 23, 42, 0.9);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

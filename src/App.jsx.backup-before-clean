@@ -1,0 +1,142 @@
+import "./App.css";
+
+const sellCoreUrl = "http://192.168.12.128:5173/";
+
+const modules = [
+  { name: "SellCore", icon: "🛒", status: "Open marketplace app", action: "Launch", url: sellCoreUrl },
+  { name: "Landscaping", icon: "🌱", status: "Yard jobs, quotes, services", action: "Open" },
+  { name: "DocsCore", icon: "📄", status: "Scripts, notes, exports", action: "Save" },
+  { name: "PhotoCore", icon: "📸", status: "Scan, capture, identify", action: "Scan" },
+  { name: "PrintCore", icon: "🖨️", status: "3D builds and parts", action: "Build" },
+  { name: "MusicCore", icon: "🎵", status: "Sounds, songs, sessions", action: "Create" },
+  { name: "ToolCore", icon: "🧰", status: "Daily repair tools", action: "Use" },
+  { name: "SimCore", icon: "🌀", status: "Practice and planning", action: "Run" },
+];
+
+const dailyActions = [
+  "Sell Something",
+  "Save a Note",
+  "Scan an Item",
+  "Create Quote",
+  "Open Pipeline",
+  "Export Pack",
+];
+
+export default function App() {
+  const openSellCore = () => {
+    window.location.href = sellCoreUrl;
+  };
+
+  return (
+    <main className="appShell">
+      <section className="heroCard">
+        <header className="topBar">
+          <div>
+            <p className="eyebrow">CELLCORE NEXUS</p>
+            <h1>Daily Command Hub</h1>
+          </div>
+
+          <div className="cellLogo" aria-label="CellCore logo">
+            ◎
+          </div>
+        </header>
+
+        <div className="coreOrbWrap">
+          <div className="ring ringOne" />
+          <div className="ring ringTwo" />
+
+          <div className="coreOrb">
+            <span>✦</span>
+            <h2>Builder Rank</h2>
+            <strong>CORE 09</strong>
+            <p>Pipeline connected</p>
+          </div>
+        </div>
+
+        <button className="primaryLaunch" onClick={openSellCore}>
+          <span>🛒</span>
+          Open SellCore App
+        </button>
+
+        <div className="pipelineStrip">
+          <div>
+            <span>Status</span>
+            <strong>Online</strong>
+          </div>
+          <div>
+            <span>Mode</span>
+            <strong>Mobile</strong>
+          </div>
+          <div>
+            <span>Pipeline</span>
+            <strong>Ready</strong>
+          </div>
+        </div>
+      </section>
+
+      <section className="sectionBlock">
+        <div className="sectionHead">
+          <p className="eyebrow">NO HASSLE</p>
+          <h2>Daily Actions</h2>
+        </div>
+
+        <div className="actionGrid">
+          {dailyActions.map((action) => (
+            <button key={action}>{action}</button>
+          ))}
+        </div>
+      </section>
+
+      <section className="sectionBlock">
+        <div className="sectionHead">
+          <p className="eyebrow">CONNECTED APPS</p>
+          <h2>Core Modules</h2>
+        </div>
+
+        <div className="moduleList">
+          {modules.map((module) => (
+            <article className="moduleCard" key={module.name}>
+              <div className="moduleIcon">{module.icon}</div>
+
+              <div className="moduleText">
+                <h3>{module.name}</h3>
+                <p>{module.status}</p>
+              </div>
+
+              {module.url ? (
+                <button onClick={() => (window.location.href = module.url)}>
+                  {module.action}
+                </button>
+              ) : (
+                <button>{module.action}</button>
+              )}
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="sectionBlock installBox">
+        <p className="eyebrow">APP ICON FIX</p>
+        <h2>Home Screen Logo</h2>
+        <p>
+          iPhone Home Screen uses <code>public/apple-touch-icon.png</code>.
+          React and CSS cannot force this by themselves.
+        </p>
+
+        <div className="fileStack">
+          <code>public/apple-touch-icon.png</code>
+          <code>public/icon-192.png</code>
+          <code>public/icon-512.png</code>
+          <code>public/manifest.webmanifest</code>
+        </div>
+      </section>
+
+      <nav className="bottomDock">
+        <button>◎ Home</button>
+        <button onClick={openSellCore}>🛒 Sell</button>
+        <button>🌱 Jobs</button>
+        <button>☰ Menu</button>
+      </nav>
+    </main>
+  );
+}

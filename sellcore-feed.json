@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Used iPhone Case",
+    "price": "$8",
+    "status": "Available",
+    "tag": "Quick Sale"
+  },
+  {
+    "name": "Bluetooth Speaker",
+    "price": "$15",
+    "status": "Available",
+    "tag": "Local Pickup"
+  },
+  {
+    "name": "Cleaning Service",
+    "price": "$25+",
+    "status": "Service",
+    "tag": "Bookable"
+  },
+  {
+    "name": "Code Red",
+    "price": "Play",
+    "status": "Forge Game",
+    "tag": "Beta Test"
+  }
+]

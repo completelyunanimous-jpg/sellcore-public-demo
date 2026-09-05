@@ -29,6 +29,7 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;fon
   const fs='precision mediump float;varying vec3 v;void main(){gl_FragColor=vec4(v,1.0);}';
   function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s)||'shader');return s}
   const prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+  if(!gl.getProgramParameter(prog,gl.LINK_STATUS))throw new Error(gl.getProgramInfoLog(prog)||'program');
   const pLoc=gl.getAttribLocation(prog,'p'),cLoc=gl.getAttribLocation(prog,'c'),mLoc=gl.getUniformLocation(prog,'m');
   const posBuf=gl.createBuffer(),colBuf=gl.createBuffer();
   let px=0,py=1.68,pz=6,yaw=0,pitch=.12,moveX=0,moveY=0,velX=0,velZ=0;
@@ -50,30 +51,26 @@ html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;fon
   function pushCube(verts,cols,x,y,z,w,h,d,col){const x0=x-w/2,x1=x+w/2,y0=y-h/2,y1=y+h/2,z0=z-d/2,z1=z+d/2;const f=[[x0,y0,z0,x1,y0,z0,x1,y1,z0,x0,y1,z0],[x1,y0,z1,x0,y0,z1,x0,y1,z1,x1,y1,z1],[x0,y0,z1,x0,y0,z0,x0,y1,z0,x0,y1,z1],[x1,y0,z0,x1,y0,z1,x1,y1,z1,x1,y1,z0],[x0,y1,z0,x1,y1,z0,x1,y1,z1,x0,y1,z1],[x0,y0,z1,x1,y0,z1,x1,y0,z0,x0,y0,z0]];for(const q of f){verts.push(...q);for(let i=0;i<4;i++)cols.push(...col)}}
   function draw(){
     const verts=[],cols=[];
-    // Large grey ground slab so the world is immediately visible.
     pushCube(verts,cols,0,-.12,0,220,.24,220,[.69,.71,.73]);
-    // Sparse grid strips for spatial scale.
     for(let i=-100;i<=100;i+=10){pushCube(verts,cols,i,.01,0,.05,.03,200,[.49,.52,.54]);pushCube(verts,cols,0,.012,i,200,.03,.05,[.49,.52,.54]);}
-    const p=mul(perspective(78,canvas.width/canvas.height,.05,700),view());
+    const matrix=mul(perspective(78,canvas.width/canvas.height,.05,700),view());
     gl.clearColor(.529,.808,.922,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
     gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,0,0);
     gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(cols),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,0,0);
-    gl.uniformMatrix4fv(mLoc,false,new Float32Array(p));gl.drawArrays(gl.TRIANGLE_FAN,0,4);
-    for(let n=4;n<verts.length/3;n+=4)gl.drawArrays(gl.TRIANGLE_FAN,n,4);
-    drawSkyObjects(p);
+    gl.uniformMatrix4fv(mLoc,false,new Float32Array(matrix));
+    for(let n=0;n<verts.length/3;n+=4)gl.drawArrays(gl.TRIANGLE_FAN,n,4);
+    drawSkyObjects(matrix);
   }
-  function billboard(x,y,z,w,h,col){const verts=[-w/2,0,0,w/2,0,0,w/2,h,0,-w/2,h,0].map((v,i)=>v+(i%3===0?x:(i%3===1?y:z)));const colors=[];for(let i=0;i<4;i++)colors.push(...col);gl.disable(gl.DEPTH_TEST);gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STREAM_DRAW);gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.STREAM_DRAW);gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,0,0);gl.uniformMatrix4fv(mLoc,false,new Float32Array(p));gl.drawArrays(gl.TRIANGLE_FAN,0,4);gl.enable(gl.DEPTH_TEST)}
-  function drawSkyObjects(p){
-    // Sun.
-    billboard(-70,72,-250,14,14,[1,.92,.58]);
-    // Broad, distant 2D cloud planes rather than a close 3D cluster.
-    [[-180,52,-280,34,12],[-70,65,-360,30,10],[70,58,-330,42,13],[190,70,-390,32,11],[-300,80,-440,44,14],[-80,92,-500,38,12],[120,84,-470,46,14],[330,70,-460,36,11],[-430,60,-520,40,13],[440,92,-560,44,14]].forEach(a=>billboard(a[0],a[1],a[2],a[3],a[4],[.97,.98,1]));
+  function billboard(matrix,x,y,z,w,h,col){const verts=[x-w/2,y,z,x+w/2,y,z,x+w/2,y+h,z,x-w/2,y+h,z];const colors=[];for(let i=0;i<4;i++)colors.push(...col);gl.disable(gl.DEPTH_TEST);gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STREAM_DRAW);gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.STREAM_DRAW);gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,0,0);gl.uniformMatrix4fv(mLoc,false,new Float32Array(matrix));gl.drawArrays(gl.TRIANGLE_FAN,0,4);gl.enable(gl.DEPTH_TEST)}
+  function drawSkyObjects(matrix){
+    billboard(matrix,-70,72,-250,14,14,[1,.92,.58]);
+    [[-180,52,-280,34,12],[-70,65,-360,30,10],[70,58,-330,42,13],[190,70,-390,32,11],[-300,80,-440,44,14],[-80,92,-500,38,12],[120,84,-470,46,14],[330,70,-460,36,11],[-430,60,-520,40,13],[440,92,-560,44,14]].forEach(a=>billboard(matrix,a[0],a[1],a[2],a[3],a[4],[.97,.98,1]));
   }
   function update(){let ix=moveX,iy=moveY;if(keys.w)iy+=1;if(keys.s)iy-=1;if(keys.a)ix-=1;if(keys.d)ix+=1;const raw=Math.hypot(ix,iy);if(raw>1){ix/=raw;iy/=raw}const mag=Math.min(1,raw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),speed=9.5;const tx=(fx*iy+rx*ix)*speed*mag,tz=(fz*iy+rz*ix)*speed*mag;velX+=(tx-velX)*.22;velZ+=(tz-velZ)*.22;if(mag<.01){velX*=.80;velZ*=.80}px+=velX/60;pz+=velZ/60;px=Math.max(-96,Math.min(96,px));pz=Math.max(-96,Math.min(96,pz))}
   function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,Math.floor(innerWidth*d));canvas.height=Math.max(1,Math.floor(innerHeight*d));canvas.style.width='100%';canvas.style.height='100%';gl.viewport(0,0,canvas.width,canvas.height)}
-  function loop(){update();draw();requestAnimationFrame(loop)}
+  function loop(){try{update();draw()}catch(err){console.error('Mobile Builder render error',err);gl.clearColor(.529,.808,.922,1);gl.clear(gl.COLOR_BUFFER_BIT);return}requestAnimationFrame(loop)}
   resize();addEventListener('resize',resize);requestAnimationFrame(loop);
-  window.MobileBuilderObserver={version:6,getState:()=>({type:'mobile-builder-observation',timestamp:Date.now(),player:{position:{x:px,y:py,z:pz},velocity:{x:velX,z:velZ}},camera:{yaw,pitch,position:{x:px,y:py,z:pz}},viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},environment:{terrain:'flat',dimensions:[200,200],objects:'ground-grid-sun-clouds'}}),capture:()=>{const s=window.MobileBuilderObserver.getState();let frame=null;try{frame=canvas.toDataURL('image/jpeg',.55)}catch{}return {...s,frame}},isLive:()=>true};
+  window.MobileBuilderObserver={version:7,getState:()=>({type:'mobile-builder-observation',timestamp:Date.now(),player:{position:{x:px,y:py,z:pz},velocity:{x:velX,z:velZ}},camera:{yaw,pitch,position:{x:px,y:py,z:pz}},viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},environment:{terrain:'flat',dimensions:[200,200],objects:'ground-grid-sun-clouds'}}),capture:()=>{const s=window.MobileBuilderObserver.getState();let frame=null;try{frame=canvas.toDataURL('image/jpeg',.55)}catch{}return {...s,frame}},isLive:()=>true};
 })();
 </script>
 </body>

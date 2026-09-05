@@ -1,44 +1,32 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<meta name="theme-color" content="#0b1020"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Mobile Builder">
-<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./icon.svg">
-<title>Mobile Builder</title>
-<style>*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87a0b5;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}#game{position:fixed;inset:0;width:100%;height:100%;display:block}#ui{position:fixed;inset:0;pointer-events:none}.top-pill{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(255,255,255,.16);border-radius:999px;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);font:800 11px/1 system-ui;letter-spacing:.12em;color:#fff}.coords{position:absolute;top:calc(env(safe-area-inset-top) + 12px);right:12px;padding:6px 9px;border-radius:10px;background:rgba(0,0,0,.45);font:11px ui-monospace,monospace;color:#eef4f8;display:none}.joystick{position:absolute;left:22px;bottom:calc(env(safe-area-inset-bottom) + 28px);width:130px;height:130px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.18);backdrop-filter:blur(10px);pointer-events:auto}.joystick::after{content:'MOVE';position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);font-size:10px;letter-spacing:.16em;color:#fff}.stick{position:absolute;width:56px;height:56px;left:37px;top:37px;border-radius:50%;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.28);transition:transform .05s linear;opacity:.95}.cam-zone{position:absolute;left:35%;right:0;top:0;bottom:0;pointer-events:auto}.crosshair{position:absolute;left:50%;top:50%;width:12px;height:12px;transform:translate(-50%,-50%);opacity:.72}.crosshair:before,.crosshair:after{content:'';position:absolute;background:#fff;border-radius:2px}.crosshair:before{width:12px;height:2px;left:0;top:5px}.crosshair:after{width:2px;height:12px;left:5px;top:0}@media(min-width:600px){.coords{display:block}.joystick{display:none}}</style>
-</head>
-<body><canvas id="game"></canvas><div id="ui"><div class="top-pill">MOBILE BUILDER</div><div class="coords" id="coords"></div><div class="cam-zone" id="camZone"></div><div class="crosshair"></div><div class="joystick" id="joystick"><div class="stick" id="stick"></div></div></div>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#0b1020">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mobile Builder">
+<link rel="manifest" href="./manifest.webmanifest"><link rel="icon" href="./icon.svg"><link rel="apple-touch-icon" href="./icon.svg"><title>Mobile Builder</title>
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#82b968;color:#fff;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none;overscroll-behavior:none}#game{position:fixed;inset:0;width:100%;height:100%;display:block}#ui{position:fixed;inset:0;pointer-events:none}.top-pill{position:absolute;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translateX(-50%);padding:7px 12px;border:1px solid rgba(255,255,255,.14);border-radius:999px;background:rgba(0,0,0,.66);backdrop-filter:blur(10px);font:800 11px/1 system-ui;letter-spacing:.12em;color:#eef7e9}.joystick{position:absolute;left:22px;bottom:calc(env(safe-area-inset-bottom) + 28px);width:130px;height:130px;border-radius:50%;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.13);backdrop-filter:blur(10px);pointer-events:auto}.joystick:after{content:'MOVE';position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);font-size:10px;letter-spacing:.16em}.stick{position:absolute;left:37px;top:37px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.22);transition:transform .08s ease}.cam-zone{position:absolute;left:35%;right:0;top:0;bottom:0;pointer-events:auto}.update{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 54px);transform:translateX(-50%);padding:8px 12px;border:0;border-radius:999px;background:#efffe9;color:#10170d;font-weight:850;font-size:11px;opacity:0;pointer-events:auto}.update.show{opacity:1}@media(min-width:600px){.joystick{display:none}}</style>
+</head><body><canvas id="game"></canvas><div id="ui"><div class="top-pill">MOBILE BUILDER</div><div id="camZone" class="cam-zone"></div><div id="joystick" class="joystick"><div id="stick" class="stick"></div></div><button id="update" class="update">UPDATE AVAILABLE</button></div>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'three';
-const canvas=document.querySelector('#game');
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x9bb0c0);
-scene.fog=new THREE.Fog(0x9bb0c0,70,180);
-const camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.05,220);
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
-renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(innerWidth,innerHeight,false);
-scene.add(new THREE.HemisphereLight(0xe8f3ff,0x52604f,1.15));
-const sun=new THREE.DirectionalLight(0xffffff,1.35);sun.position.set(35,70,20);scene.add(sun);
-const world=new THREE.Group();scene.add(world);
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x5f8d4e,roughness:1}));
-ground.rotation.x=-Math.PI/2;world.add(ground);
-const grid=new THREE.GridHelper(200,100,0x3f6635,0x537b46);grid.material.transparent=true;grid.material.opacity=.28;world.add(grid);
-let px=0,pz=0,yaw=0,pitch=0,moveX=0,moveY=0;
-const EYE_HEIGHT=1.72,SPEED=6.2,CAMERA_SENSITIVITY=.012;
-camera.position.set(px,EYE_HEIGHT,pz);
-const keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-const stickEl=document.querySelector('#stick'),joy=document.querySelector('#joystick');let joyId=null;
-joy.addEventListener('touchstart',e=>{const t=e.changedTouches[0];joyId=t.identifier;updateJoy(t);e.preventDefault()},{passive:false});
-joy.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)updateJoy(t);e.preventDefault()},{passive:false});
-joy.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null;moveX=moveY=0;stickEl.style.transform='translate(0,0)'}e.preventDefault()},{passive:false});
-function updateJoy(t){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=t.clientX-cx,dy=t.clientY-cy,mag=Math.hypot(dx,dy),max=44;if(mag>max){dx=dx/mag*max;dy=dy/mag*max}const nx=dx/max,ny=-dy/max,dead=.12,len=Math.hypot(nx,ny),adj=Math.max(0,(len-dead)/(1-dead));moveX=nx*(adj/(len||1));moveY=ny*(adj/(len||1));stickEl.style.transform=`translate(${dx}px,${dy}px)`}
-const camZone=document.querySelector('#camZone');let camId=null,lastX=0,lastY=0;
-camZone.addEventListener('touchstart',e=>{const t=e.changedTouches[0];camId=t.identifier;lastX=t.clientX;lastY=t.clientY;e.preventDefault()},{passive:false});
-camZone.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===camId){const dx=t.clientX-lastX,dy=t.clientY-lastY;lastX=t.clientX;lastY=t.clientY;yaw-=dx*CAMERA_SENSITIVITY;pitch=THREE.MathUtils.clamp(pitch+dy*CAMERA_SENSITIVITY,-1.35,1.35)}e.preventDefault()},{passive:false});
-camZone.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===camId)camId=null;e.preventDefault()},{passive:false});
-addEventListener('mousemove',e=>{if(e.buttons){yaw-=e.movementX*.008;pitch=THREE.MathUtils.clamp(pitch+e.movementY*.008,-1.35,1.35)}});
-function update(dt){let ix=moveX,iy=moveY;if(keys.w)iy+=1;if(keys.s)iy-=1;if(keys.a)ix-=1;if(keys.d)ix+=1;const len=Math.hypot(ix,iy);if(len>1){ix/=len;iy/=len}const mag=Math.min(1,len);const fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw);px+=(fx*iy+rx*ix)*SPEED*mag*dt;pz+=(fz*iy+rz*ix)*SPEED*mag*dt;px=THREE.MathUtils.clamp(px,-98,98);pz=THREE.MathUtils.clamp(pz,-98,98);camera.position.set(px,EYE_HEIGHT,pz);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=pitch;document.querySelector('#coords').textContent=`${px.toFixed(1)}, ${pz.toFixed(1)}`}
-let last=performance.now();function loop(now){requestAnimationFrame(loop);const dt=Math.min(.05,(now-last)/1000);last=now;update(dt);renderer.render(scene,camera)}requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x82b968);scene.fog=new THREE.Fog(0x82b968,55,160);
+const camera=new THREE.PerspectiveCamera(78,innerWidth/innerHeight,.05,220);
+const renderer=new THREE.WebGLRenderer({canvas:document.querySelector('#game'),antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(innerWidth,innerHeight,false);
+scene.add(new THREE.HemisphereLight(0xffffff,0x567045,1.35));const sun=new THREE.DirectionalLight(0xffffff,1.3);sun.position.set(20,40,10);scene.add(sun);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0x7fbd66,roughness:1}));ground.rotation.x=-Math.PI/2;scene.add(ground);
+const grid=new THREE.GridHelper(200,40,0x517743,0x517743);grid.material.transparent=true;grid.material.opacity=.11;scene.add(grid);
+let px=0,py=1.68,pz=6,yaw=0,pitch=.12,moveX=0,moveY=0,camDown=false,lastX=0,lastY=0;const keys={};
+addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+const joy=document.querySelector('#joystick'),stick=document.querySelector('#stick');let joyId=null;
+joy.addEventListener('touchstart',e=>{const t=e.changedTouches[0];joyId=t.identifier;setJoy(t);e.preventDefault()},{passive:false});joy.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)setJoy(t);e.preventDefault()},{passive:false});joy.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null;moveX=moveY=0;stick.style.transform='translate(0,0)'}e.preventDefault()},{passive:false});
+function setJoy(t){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,max=44;let dx=t.clientX-cx,dy=t.clientY-cy,m=Math.hypot(dx,dy);if(m>max){dx=dx/m*max;dy=dy/m*max;m=max}const nx=dx/max,ny=-dy/max,dead=.15,raw=Math.hypot(nx,ny),v=Math.max(0,(raw-dead)/(1-dead));moveX=nx*(v/(raw||1));moveY=ny*(v/(raw||1));stick.style.transform=`translate(${dx}px,${dy}px)`}
+const cam=document.querySelector('#camZone');cam.addEventListener('touchstart',e=>{const t=e.changedTouches[0];camDown=true;lastX=t.clientX;lastY=t.clientY},{passive:false});cam.addEventListener('touchmove',e=>{if(!camDown)return;const t=e.changedTouches[0],dx=t.clientX-lastX,dy=t.clientY-lastY;lastX=t.clientX;lastY=t.clientY;yaw-=dx*.012;pitch=THREE.MathUtils.clamp(pitch+dy*.009,-1.25,1.25);e.preventDefault()},{passive:false});cam.addEventListener('touchend',()=>camDown=false,{passive:false});addEventListener('mousemove',e=>{if(e.buttons){yaw-=e.movementX*.007;pitch=THREE.MathUtils.clamp(pitch+e.movementY*.006,-1.25,1.25)}});
+function update(){let ix=moveX,iy=moveY;if(keys.w)iy+=1;if(keys.s)iy-=1;if(keys.a)ix-=1;if(keys.d)ix+=1;const raw=Math.hypot(ix,iy);if(raw>1){ix/=raw;iy/=raw}const mag=Math.min(1,raw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),speed=5.5;px+=(fx*iy+rx*ix)*speed*mag/60;pz+=(fz*iy+rz*ix)*speed*mag/60;px=THREE.MathUtils.clamp(px,-96,96);pz=THREE.MathUtils.clamp(pz,-96,96);camera.position.set(px,py,pz);camera.rotation.order='YXZ';camera.rotation.y=yaw;camera.rotation.x=-pitch}
+function loop(){requestAnimationFrame(loop);update();renderer.render(scene,camera)}requestAnimationFrame(loop);addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
+let pulling=false,startY=0;addEventListener('touchstart',e=>{if(e.touches.length===1){pulling=true;startY=e.touches[0].clientY}},{passive:true});addEventListener('touchmove',e=>{if(pulling&&e.touches[0].clientY<startY)pulling=false},{passive:true});addEventListener('touchend',e=>{if(!pulling)return;const dy=e.changedTouches[0].clientY-startY;pulling=false;if(dy>90)forceUpdate()},{passive:true});
+async function forceUpdate(){try{const r=await navigator.serviceWorker?.getRegistration('./');if(r)await r.update();if(r?.waiting)r.waiting.postMessage({type:'SKIP_WAITING'});location.reload()}catch{location.reload()}}
+if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').then(r=>{r.addEventListener('updatefound',()=>{const n=r.installing;if(!n)return;n.addEventListener('statechange',()=>{if(n.state==='installed'&&navigator.serviceWorker.controller)document.querySelector('#update').classList.add('show')})})});navigator.serviceWorker.addEventListener('controllerchange',()=>location.reload())}
 </script></body></html>

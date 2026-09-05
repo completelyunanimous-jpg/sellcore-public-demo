@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='3dmobile-duplicate-v6-park-driver';
+const VERSION='3dmobile-duplicate-v7-phone-storefronts';
 const CACHE_PREFIX='3dmobile-duplicate-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./landscape-fix.css','./live-controls.js','./park-driver.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));

@@ -8,9 +8,14 @@
     const style=document.createElement('style'); style.textContent=`#liveControls{position:absolute;right:max(12px,env(safe-area-inset-right) + 8px);top:calc(env(safe-area-inset-top) + 48px);width:min(210px,34vw);padding:10px 11px;border:1px solid rgba(255,255,255,.13);border-radius:14px;background:rgba(5,9,14,.72);backdrop-filter:blur(12px);pointer-events:auto;color:#dce5ef;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;box-shadow:0 10px 30px rgba(0,0,0,.22)}#liveControls .tick-head{display:flex;justify-content:space-between;gap:8px;letter-spacing:.12em;font-weight:800;margin-bottom:6px}#liveControls .tick-head b{color:#7cf7c4}#tickFeed{height:42px;overflow:hidden;color:#8290a0;line-height:14px;white-space:pre}#tickFeed .live{color:#b9c7d6}.sens-row{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:7px;border-top:1px solid rgba(255,255,255,.09);padding-top:8px;margin-top:7px;letter-spacing:.08em}.sens-row input{width:100%;accent-color:#7cf7c4}.sens-row b{min-width:36px;text-align:right;color:#fff}@media(max-width:599px) and (orientation:portrait){#liveControls{width:184px;right:10px;top:calc(env(safe-area-inset-top) + 45px)}}@media(min-width:600px){#liveControls{width:230px}}`; document.head.appendChild(style);
     const range=document.querySelector('#sensitivity'),out=document.querySelector('#sensValue'); let sensitivity=1;
     range.addEventListener('input',()=>{sensitivity=+range.value;out.textContent=sensitivity.toFixed(2)+'×';window.dispatchEvent(new CustomEvent('player-sensitivity',{detail:sensitivity}))});
-
     const accelRange=document.querySelector('#moveAcceleration'),accelOut=document.querySelector('#moveAccelValue'); let moveAcceleration=1;
     accelRange.addEventListener('input',()=>{moveAcceleration=+accelRange.value;accelOut.textContent=moveAcceleration.toFixed(2)+'×';window.dispatchEvent(new CustomEvent('joystick-acceleration-sensitivity',{detail:moveAcceleration}))});
+
+    // The original joystick remains the source of movement. Its X/Y vector is continuous through
+    // the complete 360° with no directional snapping or angle quantization. Acceleration is exposed
+    // as runtime state for the movement system; this layer never intercepts joystick touch events.
+    window.__joystickAccelerationSensitivity=1;
+    window.addEventListener('joystick-acceleration-sensitivity',e=>{window.__joystickAccelerationSensitivity=e.detail});
 
     // Replace the original touch camera handler at capture phase so camera sensitivity is applied exactly once.
     let touchActive=false,lastX=0,lastY=0;
@@ -19,27 +24,6 @@
     cam.addEventListener('touchmove',e=>{if(!touchActive)return;e.stopImmediatePropagation();e.preventDefault();const t=e.changedTouches[0],dx=t.clientX-lastX,dy=t.clientY-lastY;lastX=t.clientX;lastY=t.clientY;window.dispatchEvent(new MouseEvent('mousemove',{bubbles:true,buttons:1,clientX:t.clientX,clientY:t.clientY,movementX:dx*sensitivity,movementY:dy*sensitivity}))},{capture:true,passive:false});
     cam.addEventListener('touchend',e=>{touchActive=false;e.stopImmediatePropagation()},{capture:true,passive:false});
     cam.addEventListener('touchcancel',e=>{touchActive=false;e.stopImmediatePropagation()},{capture:true,passive:false});
-
-    // Add a real acceleration curve to the existing joystick without rewriting the original movement loop.
-    // The finger position is progressively amplified while the joystick is held, then the original
-    // updateJoy() still performs its dead-zone and max-radius handling.
-    const joy=document.querySelector('#joystick'); let joyHoldStart=0,joyIdentifier=null;
-    joy.addEventListener('touchstart',e=>{const t=e.changedTouches[0];joyIdentifier=t.identifier;joyHoldStart=performance.now()},{capture:true,passive:false});
-    joy.addEventListener('touchmove',e=>{
-      if(e.__acceleratedJoystickEvent||joyIdentifier===null)return;
-      const source=[...e.changedTouches].find(t=>t.identifier===joyIdentifier); if(!source)return;
-      e.stopImmediatePropagation(); e.preventDefault();
-      const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
-      const hold=Math.min(1,(performance.now()-joyHoldStart)/450);
-      const gain=1+(moveAcceleration-1)*hold;
-      const x=cx+(source.clientX-cx)*gain, y=cy+(source.clientY-cy)*gain;
-      const synthetic=new Event('touchmove',{bubbles:true,cancelable:true});
-      Object.defineProperty(synthetic,'__acceleratedJoystickEvent',{value:true});
-      Object.defineProperty(synthetic,'changedTouches',{value:[{identifier:source.identifier,clientX:x,clientY:y}],enumerable:true});
-      joy.dispatchEvent(synthetic);
-    },{capture:true,passive:false});
-    joy.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyIdentifier){joyIdentifier=null;joyHoldStart=0}}, {capture:true,passive:false});
-    joy.addEventListener('touchcancel',e=>{for(const t of e.changedTouches)if(t.identifier===joyIdentifier){joyIdentifier=null;joyHoldStart=0}}, {capture:true,passive:false});
 
     let ticks=0,last=performance.now(),samples=[]; const feed=document.querySelector('#tickFeed');
     const tick=()=>{const now=performance.now(),dt=now-last;last=now;samples.push(dt);if(samples.length>30)samples.shift();const hz=1000/(samples.reduce((a,b)=>a+b,0)/samples.length||16.67);document.querySelector('#tickRate').textContent=Math.round(hz)+' Hz';const stamp=new Date().toLocaleTimeString([], {hour12:false});const lines=[`[${stamp}] TICK ${String(++ticks).padStart(6,'0')}  ${hz.toFixed(1)}Hz`,`[${stamp}] INPUT   cam=${sensitivity.toFixed(2)}x move=${moveAcceleration.toFixed(2)}x`,`[${stamp}] WORLD   LIVE / LOCAL`];feed.innerHTML=lines.map((x,i)=>i===0?`<span class="live">${x}</span>`:x).join('\n');requestAnimationFrame(tick)};requestAnimationFrame(tick);

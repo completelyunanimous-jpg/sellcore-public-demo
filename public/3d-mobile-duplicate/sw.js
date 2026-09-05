@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='mobile-builder-v8-observer';
+const VERSION='mobile-builder-v9-eyes';
 const CACHE_PREFIX='mobile-builder-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));

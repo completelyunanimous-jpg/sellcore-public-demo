@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='mobile-builder-v6';
+const VERSION='mobile-builder-v7';
 const CACHE_PREFIX='mobile-builder-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));

@@ -1,17 +1,80 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#87ceeb"><title>Mobile Builder</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;color:#fff;font-family:system-ui,sans-serif;touch-action:none;user-select:none}#game{position:fixed;inset:0;width:100%;height:100%;display:block}.top-pill{position:fixed;top:calc(env(safe-area-inset-top) + 12px);left:50%;transform:translateX(-50%);z-index:10;padding:7px 12px;border-radius:999px;background:rgba(0,0,0,.55);font:800 11px/1 system-ui;letter-spacing:.12em}.joystick{position:fixed;left:22px!important;right:auto!important;bottom:calc(env(safe-area-inset-bottom) + 24px);width:130px;height:130px;border-radius:50%;background:rgba(0,0,0,.16);border:1px solid rgba(255,255,255,.25);pointer-events:auto;z-index:20}.stick{position:absolute;left:37px;top:37px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.3)}.cam-zone{position:fixed;left:35%;right:0;top:0;bottom:0;z-index:5;pointer-events:auto}</style></head><body><canvas id="game"></canvas><div class="top-pill">MOBILE BUILDER</div><div id="camZone" class="cam-zone"></div><div id="joystick" class="joystick"><div id="stick" class="stick"></div></div><script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script><script type="module">import * as THREE from 'three';
-const canvas=document.getElementById('game');const scene=new THREE.Scene();scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,140,420);
-const camera=new THREE.PerspectiveCamera(78,innerWidth/innerHeight,.05,700);camera.rotation.order='YXZ';
-const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.setSize(innerWidth,innerHeight,false);renderer.outputColorSpace=THREE.SRGBColorSpace;
-scene.add(new THREE.HemisphereLight(0xffffff,0x6f7780,1.5));const sun=new THREE.DirectionalLight(0xffffff,1.5);sun.position.set(-40,80,20);scene.add(sun);
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:0xc7cbd0,roughness:1,metalness:0}));ground.rotation.x=-Math.PI/2;scene.add(ground);
-const grid=new THREE.GridHelper(200,40,0x8c949b,0x8c949b);grid.material.transparent=true;grid.material.opacity=.13;scene.add(grid);
-const sunMesh=new THREE.Mesh(new THREE.SphereGeometry(6,24,24),new THREE.MeshBasicMaterial({color:0xfff4b0}));sunMesh.position.set(-70,95,-250);scene.add(sunMesh);
-function makeCloudTexture(){const c=document.createElement('canvas');c.width=256;c.height=128;const x=c.getContext('2d');x.fillStyle='rgba(255,255,255,.96)';[[52,70,30],[86,58,36],[122,68,32],[158,62,28],[190,72,24]].forEach(([a,b,r])=>{x.beginPath();x.arc(a,b,r,0,Math.PI*2);x.fill()});return new THREE.CanvasTexture(c)}const cloudMat=new THREE.SpriteMaterial({map:makeCloudTexture(),transparent:true,depthWrite:false,opacity:.9,fog:true});[[ -180,78,-280,30],[-70,62,-340,26],[60,84,-300,34],[190,70,-360,28],[-300,98,-420,36],[0,112,-460,38],[300,92,-430,34],[-420,72,-500,30],[430,110,-520,36]].forEach(([x,y,z,s])=>{const q=new THREE.Sprite(cloudMat);q.position.set(x,y,z);q.scale.set(s,s*.48,1);scene.add(q)});
-let px=0,py=1.68,pz=6,yaw=0,pitch=.12,moveX=0,moveY=0,velX=0,velZ=0;const keys={};addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
-const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;function setJoy(t){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,max=44;let dx=t.clientX-cx,dy=t.clientY-cy,d=Math.hypot(dx,dy);if(d>max){dx=dx/d*max;dy=dy/d*max}const nx=dx/max,ny=-dy/max,raw=Math.hypot(nx,ny),dead=.12,v=Math.max(0,(raw-dead)/(1-dead));moveX=nx*(v/(raw||1));moveY=ny*(v/(raw||1));stick.style.transform=`translate(${dx}px,${dy}px)`}joy.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier;setJoy(e.changedTouches[0]);e.preventDefault()},{passive:false});joy.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)setJoy(t);e.preventDefault()},{passive:false});joy.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null;moveX=moveY=0;stick.style.transform='translate(0,0)'}e.preventDefault()},{passive:false});
-const cam=document.getElementById('camZone');let camDown=false,lastX=0,lastY=0;cam.addEventListener('touchstart',e=>{const t=e.changedTouches[0];camDown=true;lastX=t.clientX;lastY=t.clientY;e.preventDefault()},{passive:false});cam.addEventListener('touchmove',e=>{if(!camDown)return;const t=e.changedTouches[0],dx=t.clientX-lastX,dy=t.clientY-lastY;lastX=t.clientX;lastY=t.clientY;yaw-=dx*.014;pitch=THREE.MathUtils.clamp(pitch-dy*.010,-1.25,1.25);e.preventDefault()},{passive:false});cam.addEventListener('touchend',()=>camDown=false);
-function update(){let ix=moveX,iy=moveY;if(keys.w)iy+=1;if(keys.s)iy-=1;if(keys.a)ix-=1;if(keys.d)ix+=1;const raw=Math.hypot(ix,iy);if(raw>1){ix/=raw;iy/=raw}const mag=Math.min(1,raw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),speed=9.5;const tx=(fx*iy+rx*ix)*speed*mag,tz=(fz*iy+rz*ix)*speed*mag;velX+=(tx-velX)*.22;velZ+=(tz-velZ)*.22;if(mag<.01){velX*=.80;velZ*=.80}px+=velX/60;pz+=velZ/60;px=THREE.MathUtils.clamp(px,-96,96);pz=THREE.MathUtils.clamp(pz,-96,96);camera.position.set(px,py,pz);camera.rotation.y=yaw;camera.rotation.x=pitch}
-function loop(){requestAnimationFrame(loop);update();renderer.render(scene,camera)}requestAnimationFrame(loop);
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
-window.MobileBuilderObserver={version:5,getState:()=>({type:'mobile-builder-observation',timestamp:Date.now(),player:{position:{x:px,y:py,z:pz},velocity:{x:velX,z:velZ}},camera:{yaw,pitch,position:{x:camera.position.x,y:camera.position.y,z:camera.position.z}},viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},environment:{terrain:'flat',dimensions:[200,200],objects:scene.children.length}}),capture:()=>{const state=window.MobileBuilderObserver.getState();let frame=null;try{frame=renderer.domElement.toDataURL('image/jpeg',.55)}catch{}return {...state,frame}},isLive:()=>true};
-</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#87ceeb">
+<title>Mobile Builder</title>
+<style>
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#87ceeb;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;touch-action:none;user-select:none;-webkit-user-select:none}
+#game{position:fixed;inset:0;width:100%;height:100%;display:block}
+.top-pill{position:fixed;top:calc(env(safe-area-inset-top)+12px);left:50%;transform:translateX(-50%);z-index:10;padding:7px 12px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font:800 11px/1 system-ui;letter-spacing:.12em}
+.joystick{position:fixed;left:22px!important;right:auto!important;bottom:calc(env(safe-area-inset-bottom)+24px);width:130px;height:130px;border-radius:50%;background:rgba(0,0,0,.15);border:1px solid rgba(255,255,255,.25);pointer-events:auto;z-index:20}
+.joystick:after{content:'MOVE';position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);color:rgba(255,255,255,.85);font:700 10px/1 system-ui;letter-spacing:.16em}
+.stick{position:absolute;left:37px;top:37px;width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.32);border:1px solid rgba(255,255,255,.3)}
+.cam-zone{position:fixed;left:35%;right:0;top:0;bottom:0;z-index:5;pointer-events:auto}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div class="top-pill">MOBILE BUILDER</div>
+<div id="camZone" class="cam-zone"></div>
+<div id="joystick" class="joystick"><div id="stick" class="stick"></div></div>
+<script>
+(function(){
+  const canvas=document.getElementById('game');
+  const gl=canvas.getContext('webgl',{antialias:true,alpha:false,preserveDrawingBuffer:true});
+  if(!gl){document.body.style.background='#7f868a';return;}
+  const vs='attribute vec3 p;attribute vec3 c;uniform mat4 m;varying vec3 v;void main(){gl_Position=m*vec4(p,1.0);v=c;}';
+  const fs='precision mediump float;varying vec3 v;void main(){gl_FragColor=vec4(v,1.0);}';
+  function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s)||'shader');return s}
+  const prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+  const pLoc=gl.getAttribLocation(prog,'p'),cLoc=gl.getAttribLocation(prog,'c'),mLoc=gl.getUniformLocation(prog,'m');
+  const posBuf=gl.createBuffer(),colBuf=gl.createBuffer();
+  let px=0,py=1.68,pz=6,yaw=0,pitch=.12,moveX=0,moveY=0,velX=0,velZ=0;
+  const keys={};
+  addEventListener('keydown',e=>keys[e.key.toLowerCase()]=true);addEventListener('keyup',e=>keys[e.key.toLowerCase()]=false);
+  const joy=document.getElementById('joystick'),stick=document.getElementById('stick');let joyId=null;
+  function setJoy(t){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,max=44;let dx=t.clientX-cx,dy=t.clientY-cy,d=Math.hypot(dx,dy);if(d>max){dx=dx/d*max;dy=dy/d*max}const nx=dx/max,ny=-dy/max,raw=Math.hypot(nx,ny),dead=.12,v=Math.max(0,(raw-dead)/(1-dead));moveX=nx*(v/(raw||1));moveY=ny*(v/(raw||1));stick.style.transform=`translate(${dx}px,${dy}px)`}
+  joy.addEventListener('touchstart',e=>{joyId=e.changedTouches[0].identifier;setJoy(e.changedTouches[0]);e.preventDefault()},{passive:false});
+  joy.addEventListener('touchmove',e=>{for(const t of e.changedTouches)if(t.identifier===joyId)setJoy(t);e.preventDefault()},{passive:false});
+  joy.addEventListener('touchend',e=>{for(const t of e.changedTouches)if(t.identifier===joyId){joyId=null;moveX=moveY=0;stick.style.transform='translate(0,0)'}e.preventDefault()},{passive:false});
+  const cam=document.getElementById('camZone');let camDown=false,lastX=0,lastY=0;
+  cam.addEventListener('touchstart',e=>{const t=e.changedTouches[0];camDown=true;lastX=t.clientX;lastY=t.clientY;e.preventDefault()},{passive:false});
+  cam.addEventListener('touchmove',e=>{if(!camDown)return;const t=e.changedTouches[0],dx=t.clientX-lastX,dy=t.clientY-lastY;lastX=t.clientX;lastY=t.clientY;yaw-=dx*.014;pitch=Math.max(-1.25,Math.min(1.25,pitch-dy*.010));e.preventDefault()},{passive:false});
+  cam.addEventListener('touchend',()=>camDown=false);
+  addEventListener('mousemove',e=>{if(e.buttons){yaw-=e.movementX*.007;pitch=Math.max(-1.25,Math.min(1.25,pitch-e.movementY*.006))}});
+  function perspective(fov,aspect,near,far){const f=1/Math.tan(fov*Math.PI/360),nf=1/(near-far);return[f/aspect,0,0,0,0,f,0,0,0,0,(far+near)*nf,-1,0,0,(2*far*near)*nf,0]}
+  function mul(a,b){const o=new Array(16).fill(0);for(let r=0;r<4;r++)for(let c=0;c<4;c++)for(let k=0;k<4;k++)o[c*4+r]+=a[k*4+r]*b[c*4+k];return o}
+  function view(){const cy=Math.cos(yaw),sy=Math.sin(yaw),cx=Math.cos(pitch),sx=Math.sin(pitch);const rx=[1,0,0,0,0,cx,-sx,0,0,sx,cx,0,0,0,0,1];const ry=[cy,0,-sy,0,0,1,0,0,sy,0,cy,0,0,0,0,1];const tr=[1,0,0,0,0,1,0,0,0,0,1,0,-px,-py,-pz,1];return mul(mul(ry,rx),tr)}
+  function pushCube(verts,cols,x,y,z,w,h,d,col){const x0=x-w/2,x1=x+w/2,y0=y-h/2,y1=y+h/2,z0=z-d/2,z1=z+d/2;const f=[[x0,y0,z0,x1,y0,z0,x1,y1,z0,x0,y1,z0],[x1,y0,z1,x0,y0,z1,x0,y1,z1,x1,y1,z1],[x0,y0,z1,x0,y0,z0,x0,y1,z0,x0,y1,z1],[x1,y0,z0,x1,y0,z1,x1,y1,z1,x1,y1,z0],[x0,y1,z0,x1,y1,z0,x1,y1,z1,x0,y1,z1],[x0,y0,z1,x1,y0,z1,x1,y0,z0,x0,y0,z0]];for(const q of f){verts.push(...q);for(let i=0;i<4;i++)cols.push(...col)}}
+  function draw(){
+    const verts=[],cols=[];
+    // Large grey ground slab so the world is immediately visible.
+    pushCube(verts,cols,0,-.12,0,220,.24,220,[.69,.71,.73]);
+    // Sparse grid strips for spatial scale.
+    for(let i=-100;i<=100;i+=10){pushCube(verts,cols,i,.01,0,.05,.03,200,[.49,.52,.54]);pushCube(verts,cols,0,.012,i,200,.03,.05,[.49,.52,.54]);}
+    const p=mul(perspective(78,canvas.width/canvas.height,.05,700),view());
+    gl.clearColor(.529,.808,.922,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.enable(gl.DEPTH_TEST);
+    gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,0,0);
+    gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(cols),gl.DYNAMIC_DRAW);gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,0,0);
+    gl.uniformMatrix4fv(mLoc,false,new Float32Array(p));gl.drawArrays(gl.TRIANGLE_FAN,0,4);
+    for(let n=4;n<verts.length/3;n+=4)gl.drawArrays(gl.TRIANGLE_FAN,n,4);
+    drawSkyObjects(p);
+  }
+  function billboard(x,y,z,w,h,col){const verts=[-w/2,0,0,w/2,0,0,w/2,h,0,-w/2,h,0].map((v,i)=>v+(i%3===0?x:(i%3===1?y:z)));const colors=[];for(let i=0;i<4;i++)colors.push(...col);gl.disable(gl.DEPTH_TEST);gl.bindBuffer(gl.ARRAY_BUFFER,posBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(verts),gl.STREAM_DRAW);gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,colBuf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(colors),gl.STREAM_DRAW);gl.enableVertexAttribArray(cLoc);gl.vertexAttribPointer(cLoc,3,gl.FLOAT,false,0,0);gl.uniformMatrix4fv(mLoc,false,new Float32Array(p));gl.drawArrays(gl.TRIANGLE_FAN,0,4);gl.enable(gl.DEPTH_TEST)}
+  function drawSkyObjects(p){
+    // Sun.
+    billboard(-70,72,-250,14,14,[1,.92,.58]);
+    // Broad, distant 2D cloud planes rather than a close 3D cluster.
+    [[-180,52,-280,34,12],[-70,65,-360,30,10],[70,58,-330,42,13],[190,70,-390,32,11],[-300,80,-440,44,14],[-80,92,-500,38,12],[120,84,-470,46,14],[330,70,-460,36,11],[-430,60,-520,40,13],[440,92,-560,44,14]].forEach(a=>billboard(a[0],a[1],a[2],a[3],a[4],[.97,.98,1]));
+  }
+  function update(){let ix=moveX,iy=moveY;if(keys.w)iy+=1;if(keys.s)iy-=1;if(keys.a)ix-=1;if(keys.d)ix+=1;const raw=Math.hypot(ix,iy);if(raw>1){ix/=raw;iy/=raw}const mag=Math.min(1,raw),fx=-Math.sin(yaw),fz=-Math.cos(yaw),rx=Math.cos(yaw),rz=-Math.sin(yaw),speed=9.5;const tx=(fx*iy+rx*ix)*speed*mag,tz=(fz*iy+rz*ix)*speed*mag;velX+=(tx-velX)*.22;velZ+=(tz-velZ)*.22;if(mag<.01){velX*=.80;velZ*=.80}px+=velX/60;pz+=velZ/60;px=Math.max(-96,Math.min(96,px));pz=Math.max(-96,Math.min(96,pz))}
+  function resize(){const d=Math.min(devicePixelRatio||1,2);canvas.width=Math.max(1,Math.floor(innerWidth*d));canvas.height=Math.max(1,Math.floor(innerHeight*d));canvas.style.width='100%';canvas.style.height='100%';gl.viewport(0,0,canvas.width,canvas.height)}
+  function loop(){update();draw();requestAnimationFrame(loop)}
+  resize();addEventListener('resize',resize);requestAnimationFrame(loop);
+  window.MobileBuilderObserver={version:6,getState:()=>({type:'mobile-builder-observation',timestamp:Date.now(),player:{position:{x:px,y:py,z:pz},velocity:{x:velX,z:velZ}},camera:{yaw,pitch,position:{x:px,y:py,z:pz}},viewport:{width:innerWidth,height:innerHeight,dpr:devicePixelRatio||1},environment:{terrain:'flat',dimensions:[200,200],objects:'ground-grid-sun-clouds'}}),capture:()=>{const s=window.MobileBuilderObserver.getState();let frame=null;try{frame=canvas.toDataURL('image/jpeg',.55)}catch{}return {...s,frame}},isLive:()=>true};
+})();
+</script>
+</body>
+</html>

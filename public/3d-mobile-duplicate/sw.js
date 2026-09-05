@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='mobile-builder-v17-flat-sky';
+const VERSION='mobile-builder-v18-flat-skyline';
 const CACHE_PREFIX='mobile-builder-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));
@@ -20,11 +20,13 @@ async function patchHTML(response){
   const sky=`
   const skySun=new THREE.Mesh(new THREE.SphereGeometry(7,24,24),new THREE.MeshBasicMaterial({color:0xfff4b0}));
   skySun.position.set(-180,120,-360);scene.add(skySun);
-  const cloudCanvas=document.createElement('canvas');cloudCanvas.width=256;cloudCanvas.height=128;const cloudCtx=cloudCanvas.getContext('2d');cloudCtx.fillStyle='rgba(255,255,255,.92)';[[58,68,42],[92,54,34],[126,66,38],[160,70,30],[78,78,28],[137,80,27]].forEach(([x,y,r])=>{cloudCtx.beginPath();cloudCtx.arc(x,y,r,0,Math.PI*2);cloudCtx.fill()});
-  const cloudTexture=new THREE.CanvasTexture(cloudCanvas);cloudTexture.colorSpace=THREE.SRGBColorSpace;
-  const cloudMat=new THREE.SpriteMaterial({map:cloudTexture,transparent:true,depthWrite:false,opacity:.9});
-  const cloudPositions=[[-220,72,-360,42],[ -130,48,-430,32],[-35,86,-390,46],[70,58,-470,38],[170,78,-400,44],[265,52,-350,34],[-300,105,-500,48],[-70,118,-520,40],[120,105,-540,52],[310,96,-510,43],[-430,68,-470,38],[430,82,-460,45],[-520,115,-560,50],[500,125,-600,48],[-180,145,-620,42],[230,138,-650,46]];
-  for(const [x,y,z,size] of cloudPositions){const s=new THREE.Sprite(cloudMat);s.position.set(x,y,z);s.scale.set(size,size*.5,1);scene.add(s)}
+  const skyCanvas=document.createElement('canvas');skyCanvas.width=2048;skyCanvas.height=1024;const skyCtx=skyCanvas.getContext('2d');
+  const skyGrad=skyCtx.createLinearGradient(0,0,0,1024);skyGrad.addColorStop(0,'#63b9f3');skyGrad.addColorStop(.62,'#87ceeb');skyGrad.addColorStop(.82,'#9fd7ee');skyGrad.addColorStop(1,'#b8dfe9');skyCtx.fillStyle=skyGrad;skyCtx.fillRect(0,0,2048,1024);
+  const drawCloud=(x,y,s)=>{skyCtx.save();skyCtx.fillStyle='rgba(255,255,255,.9)';skyCtx.beginPath();skyCtx.ellipse(x,y,s*1.7,s*.52,0,0,Math.PI*2);skyCtx.ellipse(x-s*.85,y+s*.05,s*.9,s*.42,0,0,Math.PI*2);skyCtx.ellipse(x+s*.2,y-s*.18,s*1.05,s*.5,0,0,Math.PI*2);skyCtx.ellipse(x+s*.95,y+s*.04,s*.78,s*.38,0,0,Math.PI*2);skyCtx.fill();skyCtx.restore()};
+  [[90,620,42],[270,675,54],[470,600,46],[700,650,58],[940,575,40],[1160,660,55],[1390,610,48],[1610,675,60],[1840,600,44],[2040,650,50],[150,790,30],[540,760,34],[1010,745,32],[1490,770,36],[1870,760,30]].forEach(([x,y,s])=>drawCloud(x,y,s));
+  const skyTexture=new THREE.CanvasTexture(skyCanvas);skyTexture.colorSpace=THREE.SRGBColorSpace;skyTexture.anisotropy=2;
+  const skyDome=new THREE.Mesh(new THREE.SphereGeometry(600,64,32),new THREE.MeshBasicMaterial({map:skyTexture,side:THREE.BackSide,depthWrite:false,fog:false}));
+  skyDome.position.set(0,0,0);scene.add(skyDome);
   `;
   html=html.replace('scene.add(sun);','scene.add(sun);'+sky);
   return new Response(html,{status:response.status,statusText:response.statusText,headers:response.headers});

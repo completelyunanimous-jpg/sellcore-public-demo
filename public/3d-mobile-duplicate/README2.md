@@ -1,1 +1,0 @@
-This duplicate is derived from the exact 3D Mobile artifact files on main.

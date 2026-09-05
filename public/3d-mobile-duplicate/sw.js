@@ -1,7 +1,7 @@
 'use strict';
-const VERSION='mobile-builder-v21-render-fix';
+const VERSION='mobile-builder-v22-agent-eyes';
 const CACHE_PREFIX='mobile-builder-';
-const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
+const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg','./agent-runtime.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(n=>n.startsWith(CACHE_PREFIX)&&n!==VERSION).map(n=>caches.delete(n)))).then(()=>self.clients.claim())));
 self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting()});

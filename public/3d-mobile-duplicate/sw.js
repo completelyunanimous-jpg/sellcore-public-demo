@@ -1,5 +1,5 @@
 'use strict';
-const VERSION='mobile-builder-v13-sky-joystick';
+const VERSION='mobile-builder-v14-camera-fixed';
 const CACHE_PREFIX='mobile-builder-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));
@@ -9,8 +9,8 @@ async function patchHTML(response){
   const type=response.headers.get('content-type')||'';
   if(!type.includes('text/html'))return response;
   let html=await response.text();
-  html=html.replace(/pitch=THREE\.MathUtils\.clamp\(pitch-dy\*\.009,-1\.25,1\.25\)/g,'pitch=THREE.MathUtils.clamp(pitch+dy*.009,-1.25,1.25)');
-  html=html.replace(/pitch=THREE\.MathUtils\.clamp\(pitch-e\.movementY\*\.006,-1\.25,1\.25\)/g,'pitch=THREE.MathUtils.clamp(pitch+e.movementY*.006,-1.25,1.25)');
+  html=html.replace(/pitch=THREE\.MathUtils\.clamp\(pitch\+dy\*\.009,-1\.25,1\.25\)/g,'pitch=THREE.MathUtils.clamp(pitch-dy*.009,-1.25,1.25)');
+  html=html.replace(/pitch=THREE\.MathUtils\.clamp\(pitch\+e\.movementY\*\.006,-1\.25,1\.25\)/g,'pitch=THREE.MathUtils.clamp(pitch-e.movementY*.006,-1.25,1.25)');
   html=html.replace('</head>','<style>html,body{background:#87ceeb!important}.joystick{left:22px!important;right:auto!important;top:auto!important;bottom:calc(env(safe-area-inset-bottom) + 28px)!important;position:absolute!important;display:block!important;z-index:20!important}.stick{position:absolute!important}.agent-window,.live-monitor,.build-banner{display:none!important}</style></head>');
   html=html.replace('scene.background=new THREE.Color(0xb9c1c6);scene.fog=new THREE.Fog(0xb9c1c6,70,180);','scene.background=new THREE.Color(0x87ceeb);scene.fog=new THREE.Fog(0x87ceeb,100,220);');
   const sky=`

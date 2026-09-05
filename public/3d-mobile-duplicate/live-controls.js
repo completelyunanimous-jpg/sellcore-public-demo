@@ -26,7 +26,7 @@
     const joy=document.querySelector('#joystick'); let joyHoldStart=0,joyIdentifier=null;
     joy.addEventListener('touchstart',e=>{const t=e.changedTouches[0];joyIdentifier=t.identifier;joyHoldStart=performance.now()},{capture:true,passive:false});
     joy.addEventListener('touchmove',e=>{
-      if(joyIdentifier===null)return;
+      if(e.__acceleratedJoystickEvent||joyIdentifier===null)return;
       const source=[...e.changedTouches].find(t=>t.identifier===joyIdentifier); if(!source)return;
       e.stopImmediatePropagation(); e.preventDefault();
       const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;
@@ -34,6 +34,7 @@
       const gain=1+(moveAcceleration-1)*hold;
       const x=cx+(source.clientX-cx)*gain, y=cy+(source.clientY-cy)*gain;
       const synthetic=new Event('touchmove',{bubbles:true,cancelable:true});
+      Object.defineProperty(synthetic,'__acceleratedJoystickEvent',{value:true});
       Object.defineProperty(synthetic,'changedTouches',{value:[{identifier:source.identifier,clientX:x,clientY:y}],enumerable:true});
       joy.dispatchEvent(synthetic);
     },{capture:true,passive:false});

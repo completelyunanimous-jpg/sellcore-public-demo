@@ -11,13 +11,12 @@
     const accelRange=document.querySelector('#moveAcceleration'),accelOut=document.querySelector('#moveAccelValue'); let moveAcceleration=1;
     accelRange.addEventListener('input',()=>{moveAcceleration=+accelRange.value;accelOut.textContent=moveAcceleration.toFixed(2)+'×';window.dispatchEvent(new CustomEvent('joystick-acceleration-sensitivity',{detail:moveAcceleration}))});
 
-    // The original joystick remains the source of movement. Its X/Y vector is continuous through
-    // the complete 360° with no directional snapping or angle quantization. Acceleration is exposed
-    // as runtime state for the movement system; this layer never intercepts joystick touch events.
+    // 360-degree joystick is owned by the original movement code. This layer only supplies
+    // acceleration sensitivity as a scalar; it never intercepts or reshapes joystick coordinates.
     window.__joystickAccelerationSensitivity=1;
     window.addEventListener('joystick-acceleration-sensitivity',e=>{window.__joystickAccelerationSensitivity=e.detail});
 
-    // Replace the original touch camera handler at capture phase so camera sensitivity is applied exactly once.
+    // Touch camera sensitivity: replace the original camera touch handler at capture phase.
     let touchActive=false,lastX=0,lastY=0;
     const cam=document.querySelector('#camZone');
     cam.addEventListener('touchstart',e=>{const t=e.changedTouches[0];touchActive=true;lastX=t.clientX;lastY=t.clientY;e.stopImmediatePropagation()},{capture:true,passive:false});

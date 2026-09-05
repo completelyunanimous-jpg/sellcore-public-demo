@@ -1,6 +1,6 @@
 'use strict';
-const VERSION='3dmobile-duplicate-v1';
-const CACHE_PREFIX='3dmobile-duplicate-';
+const VERSION='mobile-builder-v2';
+const CACHE_PREFIX='mobile-builder-';
 const SHELL=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(VERSION).then(c=>c.addAll(SHELL)).catch(()=>{}).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(names=>Promise.all(names.filter(n=>n.startsWith(CACHE_PREFIX)&&n!==VERSION).map(n=>caches.delete(n)))).then(()=>self.clients.claim())));
